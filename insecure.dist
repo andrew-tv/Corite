@@ -1,0 +1,35 @@
+logins:
+# nameId: login
+    noreply: noreply@..
+    root: root@..
+    test: test@..
+    newuser: newuser@..
+passwds:
+# nameId: passwd
+    root: 111111
+    test: 111111
+    newuser: 111111
+usernames:
+# nameId: username
+    root: fname1 lname1
+    test: fname2 lname2
+    newuser: fname3 lname4
+
+urls:
+    dev: https://.dev.com
+    prod: https://.prod.com
+    base: https://.base.com
+    admindev: https://.admindev.com
+
+pathto:
+    logfile: ./log.txt
+    screenshots: ./Screenshots/
+    files: ./toUpload/
+
+email:
+    protocol: mail.store.protocol
+    store: imaps
+    connect: mail.plur.se
+    folder: inbox
+    account: autotest@july.agency
+    password: ghbdtn

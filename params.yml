@@ -1,0 +1,180 @@
+browser:
+    CHROME_HEADLESS
+#browser: FIREFOX_HEADLESS
+
+dimension:
+    width: 375
+    hight: 667
+
+csss:
+    confirmlinks:
+       registration: "a.confirm_registration_link"
+    loginpage:
+       email: "[name=email]"
+       password: "[name=password]"
+       submit: "form .mat-flat-button.mat-primary"
+    registerpage:
+       yourEmailIn: "input[name=email]"
+       firstNameIn: "input[name=fname]"
+       lastNameIn: "input[name=lname]"
+       passwordNewIn: "input[name=new-password]"
+       passwordConfirmIn: "input[name=new-password-confirm]"
+       telephoneIn: "input[name=phone]"
+       registerSubmit: "button.mat-flat-button"
+       registerConfirmationTxt: "page-account-register > main > account-register > div > p > strong" # email of a jast registered user 
+    thankyoupage:
+       txtContent: "app-root"
+    explorepage:
+       loginBtn: "a[routerlink='/user/login']"
+       userName: "a[routerlink='/profile']"
+       profileBtn: ".button.mat-icon-button"
+       menuAdmin: "a.mat-list-link[href='https://admin.dev.corite.com/']"
+       menuMyCampaign: "a.mat-list-link[href='/my-campaigns']"
+       menuLogoutBtn: "button.mat-list-link"
+       startCampaignTab: "a.mat-tab-link:nth-child(2)"
+    startcampaignpage:
+       campaignImage: "campaign-group-own-image input"
+       campaignSong: "campaign-group-own-song input"
+       campaignName: "campaign-group-own-basics input[name='campaign[name]']"
+       campaignArtist: "campaign-group-own-basics input[name='campaign[artist]']"
+       campaignGenre: "campaign-group-own-genre input"
+       campaignGenreSelect: "div.mat-autocomplete-panel > mat-option:nth-of-type(1)"
+       campaignValue: "mat-slider"
+       textArea: "textarea"
+       iagree: ".mat-checkbox-inner-container"#"mat-checkbox"
+       campaignPublish: ".mat-flat-button.mat-primary" 
+       
+    adminpage:
+        searchQuery: "input[name=query]" 
+        searchBtn: "button[type=submit].btn"
+        dropdownMenuBtn: "td div button.btn.dropdown-toggle"
+        deleteUserBtn: "a.action-delete"
+        confirmDeleteUserBtn: "#modal-delete-button"
+       
+
+flowsss:
+    loginlogout:
+#0
+      - csss: "nav.top" # css selector to check html state before running a command
+        hash: "-374736186" # hashcode of the element's innerHTML
+#1
+      - csss: "page-account-login"
+        hash: "1021757751"#"-145858168"
+#2
+      - csss: "page-account-login"
+        hash: "-1521376841"#"34700424"
+#3
+      - csss: "page-account-login"
+        hash: "1443072875"#"-299957856"
+#4
+      - csss: "page-account-login"
+        hash: "-1763479294"#"-1072896969"
+#5
+      - csss: "nav.top" # user is logined
+        hash: "797664249"
+#6
+      - csss: ".mat-menu-panel" # logout begins — dropdown menu
+        hash: "2031597806"
+
+    registerwithemail:
+#0
+      - csss: "page-account-register" # css selector to check html state before running a command
+        hash: "614024734"#"1918423841" # hashcode of the element's innerHTML
+#1
+      - csss: "nav.top" # login admin to delete just registered user
+        hash: "-374736186"#"1204740996"
+#2
+      - csss: "page-account-login"
+        hash: "1021757751"
+#3
+      - csss: "page-account-login"
+        hash: "-1521376841"
+#4
+      - csss: "page-account-login"
+        hash: "1773633089"
+#5
+      - csss: "page-account-login"
+        hash: "-979219880"
+#6
+      - csss: "nav.top" # login admin is completed
+        hash: "-2026112993"
+#7
+      - csss: "td.no-results"
+        hash: "-1435612481"
+        
+    startcampaign:
+#0
+      - csss: "nav.top" # css selector to check html state before running a command
+        hash: "-374736186"#"1204740996" # hashcode of the element's innerHTML
+#1
+      - csss: "page-account-login"
+        hash: "1021757751"
+#2
+      - csss: "page-account-login"
+        hash: "-1521376841"
+#3
+      - csss: "page-account-login"
+        hash: "1443072875"
+#4
+      - csss: "page-account-login"
+        hash: "-1763479294"
+#5
+      - csss: "app-navigation" # user is logined
+        hash: "797664249"
+#6
+      - csss: "app-navigation" # user is logined
+        hash: "-190401845"
+#7
+      - csss: "app-navigation" # start campaing / press Start Campaing button
+        hash: "797664249"
+#8
+      - csss: "article"
+        hash: "628708281"
+#9
+      - csss: "small"
+        hash: "1894680791"
+#10
+      - csss: ".mat-menu-panel"
+        hash: "-374736186"
+#11
+      - csss: "page-campaign-own-list" # click My campaigns / check creating a campaign
+        hash: "1021757751"      
+#12
+      - csss: ".mat-menu-panel" # logout user begins — dropdown menu
+        hash: "-1521376841"     
+#13
+      - csss: "nav.top" # login admin to delete just creating campaign
+        hash: "1773633089"
+#14
+      - csss: "app-root"
+        hash: "-979219880"
+#15
+      - csss: "app-root"
+        hash: "-2026112993"
+#16
+      - csss: "app-root"
+        hash: "241679551"
+#17
+      - csss: "app-root"
+        hash: "2"
+    
+patterns:
+#  id: pattern
+    1: Login | Corite
+    2: Explore | Corite
+    3: "mat-tab-link mat-tab-label-active" # It's classname of the tab Start Campaign if it's active 
+    4: Sign Up | Corite
+    5: All campaigns
+
+logger:
+    debug: true
+    action: true
+    info: true
+    passed: true
+    warning: true
+    failed: true
+
+runtests: 
+   - loginlogout
+   - registerwithemail
+   - startcampaign
