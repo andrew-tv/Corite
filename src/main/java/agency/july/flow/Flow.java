@@ -88,7 +88,14 @@ public class Flow implements IFlow {
 		byte[] bytes = ( (TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES );
 		return java.util.Arrays.hashCode(bytes);
 	}
+	
+	@Override
+	public int getExpectedHtmlHash() {
+		return Integer.parseInt( flowMap.get(this.currentSlide).get("hash") );
+	}
 
+/*
+	@Override
 	public void waitForHtmlHash() {
 		String cssSelector = flowMap.get(this.currentSlide).get("csss");
 		Element el = new Element(this, By.cssSelector( cssSelector ));
@@ -118,11 +125,12 @@ public class Flow implements IFlow {
 			}
 		}
 	}
-	
+*/	
+	@Override
 	public void waitForHtmlHash(By by) {
 		Element el = new Element(this, by);
 		if ( dutycycle > 0 && repetitions > 0 ) { // Ожидание задано
-			int expectedHash = Integer.parseInt( flowMap.get(this.currentSlide).get("hash") );
+			int expectedHash = getExpectedHtmlHash();
 		// Цикл ожидания события (изменения состояния)
 			int num = 0;
 			try {

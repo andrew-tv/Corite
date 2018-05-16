@@ -9,7 +9,8 @@ public interface IFlow {
 	public int getScreenshotHash();
 	public void incSlideNumber();
 	public int getCurrentSlide();
-	public void waitForHtmlHash();
+//	public void waitForHtmlHash();
 	public void waitForHtmlHash(By by);
 	public void makeScreenshot();
+	int getExpectedHtmlHash();
 }

@@ -62,7 +62,6 @@ public class User extends Test {
 	
 	public User(Flow flow) {
 		super(flow);
-	    goHome();
 		
 		// Explore page
 		loginBtn =	new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("loginBtn")), By.cssSelector("nav.top"));
@@ -95,12 +94,12 @@ public class User extends Test {
 		this.userTel = "+380507502818";
 		return this;
 	}
-	
-	@Override
-    public void goHome() { 
-    	driver.get(Accesses.getUrls().get("dev"));
-    }
-
+/*	
+    @Override
+	public String getBaseUrl() {
+		return Accesses.getUrls().get("base");
+	}
+*/	
 	public String getUserFullName() {
 		return userFullName;
 	}
@@ -113,8 +112,9 @@ public class User extends Test {
 		
 		ACTION.writeln("Login user : " + this.userEmail);		
 		flow.setDriver(driver);
-		WebDriverWait wait = new WebDriverWait(driver, 5);
+		WebDriverWait wait = new WebDriverWait(driver, 15);
 		
+	    goHome();
 		try {
 			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-list")) );
 			PASSED.writeln("Page with element 'page-explore-list' has been reached");
@@ -197,7 +197,7 @@ public class User extends Test {
 			registerSubmit.click();
 			
 			// Check email
-			confirmation( getToken(
+			/*confirmation(*/ driver.get( getToken(
 				Accesses.getLogins().get("noreply"),	// from
 				this.userEmail,								// to
 				Configuration.getCsss().get("confirmlinks").get("registration") // confirm link in the letter
@@ -205,10 +205,10 @@ public class User extends Test {
 			
 			try {
 				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-account-check")) );
-				PASSED.writeln("Thankyou page has been reached");
+				PASSED.writeln("Thankyou page of registration has been reached");
 			} catch (TimeoutException e1) {
-				FAILED.writeln("Thankyou page has not been reached");
-				throw new TestFailedException();
+				FAILED.writeln("Thankyou page  of registration has not been reached");
+//				throw new TestFailedException();
 			}
 						
 		} catch (TestFailedException e) {
@@ -218,20 +218,20 @@ public class User extends Test {
 			throw new TestFailedException();
 		}
 	}
-
-	private void confirmation(String tokenURL) {
+/*
+	protected void confirmation(String tokenURL) {
 		if ( tokenURL.isEmpty() ) { // Не получено письмо с токеном подтверждения регистрации
-			FAILED.writeln("The token has not been received in the registration confirmation letter or the time was out");
+			FAILED.writeln("The token has not been received in the email or the time was out");
 			throw new TestFailedException();
 		} else { // Все нормально, подтверждаем регистрацию и проверяем это выходом на thankyou page, где находим имя зарегестрированного юзера
 			PASSED.writeln("The token has been received");
 			driver.get(tokenURL);
 		}
 	}
-
-	private String getToken (String sender, String recipient, String selector) throws InterruptedException {
+*/
+	protected String getToken (String sender, String recipient, String selector) throws InterruptedException {
 		String tokenURL = "";
-		ACTION.writeln("Confirmation registration >> From: " + sender + " To: " + recipient);
+		ACTION.writeln("Waiting for email in \"" + Accesses.getEmail().getFolder() + "\" folder >> ");
 		for (int i = 0; i < 5; i++) { // Ожидание письма до 5 раз по 5 с
 			Thread.sleep(5000);
 		    ImapClient imapClient = new ImapClient (Accesses.getEmail());
@@ -239,8 +239,17 @@ public class User extends Test {
 			tokenURL = imapClient.getHref( sender, recipient, selector );
 			
 	    	imapClient.close();
-			ACTION.writeln("Waiting for email in \"" + Accesses.getEmail().getFolder() + "\" folder >> " + i + " >> Confirm URL for registration >> " + (tokenURL.isEmpty() ? "???" : tokenURL));
 			if ( !tokenURL.isEmpty() ) break;
+		}
+		if ( tokenURL.isEmpty() ) { // Не получено письмо с токеном подтверждения регистрации
+			FAILED.writeln("The token has not been received in the email or the time was out." 
+					+ "\n\tSender: " + sender
+					+ "\n\tRecipient: " + recipient
+					+ "\n\tCss selector of confirm link: " + selector);
+//			throw new TestFailedException();
+		} else { // Все нормально, подтверждаем регистрацию и проверяем это выходом на thankyou page, где находим имя зарегестрированного юзера
+			PASSED.writeln("The token has been received: " + tokenURL);
+//			driver.get(tokenURL);
 		}
 		return tokenURL;
 	}
@@ -275,9 +284,11 @@ public class User extends Test {
 			campaignValue.set(Keys.ARROW_RIGHT);
 			campaignValue.set(Keys.ARROW_RIGHT);
 
-			campaignSong.set(new File (Accesses.getPathto().get("files") + "abba__the_day_before_you_came.mp3").getAbsolutePath());
+//			campaignSong.set(new File (Accesses.getPathto().get("files") + "abba__the_day_before_you_came.mp3").getAbsolutePath());
+			campaignSong.set(new File (Accesses.getPathto().get("files") + "chillingmusic.wav").getAbsolutePath());
+//			DEBUG.writeln(driver.findElement(By.cssSelector("div.audio > div > div.slider__max")).getText());
 			try {
-				wait.until( ExpectedConditions.textToBe(By.cssSelector("div.audio > div > div.slider__max"), "05:49") );
+				wait.until( ExpectedConditions.textToBe(By.cssSelector("div.audio > div > div.slider__max"), "00:27") );
 				PASSED.writeln("Audio has been uploaded");
 			} catch (TimeoutException e1) {
 				FAILED.writeln("Problem with uploading audio. Timeout 50 sec.");
@@ -290,9 +301,12 @@ public class User extends Test {
 			textArea.set("Last ABBA's song");
 			iagree.click();
 
+			wait.withTimeout(5, TimeUnit.SECONDS);
+			
+			campaignPublish.click();
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector(".mat-flat-button.mat-primary.ng-star-inserted")) ); //
 			campaignPublish.click();
 			
-			wait.withTimeout(5, TimeUnit.SECONDS);
 			try {
 				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-campaign-own-edit")) ); //
 				PASSED.writeln("Next page with element 'page-campaign-own-edit' has been reached");
@@ -320,5 +334,10 @@ public class User extends Test {
 		}
 	}
 	
+    public void teardown () {
+    	driver.get(getBaseUrl() + "/logout");
+    	driver.quit();
+    }
+
 
 }

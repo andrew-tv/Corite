@@ -6,9 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.yaml.snakeyaml.Yaml;
@@ -17,6 +15,7 @@ import agency.july.config.models.Accesses;
 import agency.july.config.models.Configuration;
 import agency.july.flow.Admin;
 import agency.july.flow.Flow;
+import agency.july.flow.Test;
 import agency.july.flow.TestFailedException;
 import agency.july.flow.User;
 import agency.july.logger.TestingLogger;
@@ -130,24 +129,30 @@ public class App {
 								
 								Flow flow = new Flow( "startcampaign" );
 
+					            Test nonameUser = new User( flow );
 								User user = new User( flow ).withUser( "test" );
+					            Admin root = new Admin( flow ).withUser( "root" ); // Supper admin
+					            Admin admin = new Admin( flow ).withUser( "admin" );
 								
 								try {			
 									
-						            user.login(); 
-						            PASSED.writeln("Login an user");
-						            user.startCampaign();
-						            PASSED.writeln("Start Campaign");
-						            user.logout(); 
-						            PASSED.writeln("Logout an user");
-						            Admin admin = new Admin( flow ).withUser( "root" );
-									admin.login();
-									PASSED.writeln("Login the admin");
-								    admin.gotoAdminPage();
-									PASSED.writeln("Admin page has been reached");
-								    admin.removeCampaign();
-									PASSED.writeln("Campaign has been removed");
+									admin.login(); 
+						            admin.setModeratorRole43(true);
 						            
+						            flow.incSlideNumber();
+						            
+						            user.login(); 
+						            user.startCampaign();
+						            
+						            admin.confirmModeration();
+						            admin.setModeratorRole43(false);
+						            
+						            nonameUser.checkFirstCampaignInList();
+/*						            
+						            root.login();
+									root.gotoAdminPage();
+									root.removeCampaign("The day before you came");
+*/						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
 									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
@@ -158,6 +163,8 @@ public class App {
 								} finally {
 						            INFO.writeln("Start Campaign test finished");
 						            user.teardown();
+						            root.teardown();
+						            admin.teardown();
 								}
 							}
 						});

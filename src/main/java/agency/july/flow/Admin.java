@@ -1,9 +1,11 @@
 package agency.july.flow;
 
-import static agency.july.logger.Logevent.ACTION;
+import static agency.july.logger.Logevent.*;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -14,7 +16,9 @@ import agency.july.webelements.TextInput;
 
 public class Admin extends User {
 	
-	private final String allUsers = Accesses.getUrls().get("admindev") + "/?entity=User&action=list&menuIndex=9&submenuIndex=-1";
+	private final String baseurl = Accesses.getUrls().get("adminbase");
+	private final String allUsers = baseurl + "/?entity=User&action=list&menuIndex=9&submenuIndex=-1";
+	private final String editUser43 = baseurl + "/?entity=User&action=edit&id=43";
 
 	// Explore page
 	private Element menuAdmin;
@@ -26,10 +30,13 @@ public class Admin extends User {
 	private Element deleteUserBtn;	
 	private Element confirmDeleteUserBtn;
 	
+	// Moderation page	    
+	private Element acceptedModeration;	
+	private Element saveChangesModeration;	
 
 	public Admin(Flow flow) {
 		super(flow);
-	    goHome();
+//	    goHome();
 	    
 		// Explore page	    
 	    menuAdmin = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuAdmin")));
@@ -39,6 +46,9 @@ public class Admin extends User {
 		dropdownMenuBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("dropdownMenuBtn")));	
 		deleteUserBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("deleteUserBtn")));	
 		confirmDeleteUserBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("confirmDeleteUserBtn")));
+		// Moderation page	    
+		acceptedModeration = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("moderationpage").get("acceptedModeration")));
+		saveChangesModeration = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("moderationpage").get("saveChangesModeration")));
 
 	}
 	
@@ -52,6 +62,11 @@ public class Admin extends User {
 		this.userTel = "+380507502818";
 		return this;
 	}
+	
+    @Override
+	public String getBaseUrl() {
+    	return baseurl;
+    }
 
 	public void gotoAdminPage() {
 		
@@ -62,7 +77,7 @@ public class Admin extends User {
 		
 		try {
 			profileBtn.click();
-			menuAdmin.click(); //        menuAdmin: "a.mat-menu-item.ng-star-inserted"
+			menuAdmin.click();
 			// Change window
 			for(String winHandle : driver.getWindowHandles()){
 			    driver.switchTo().window(winHandle);
@@ -70,13 +85,24 @@ public class Admin extends User {
 			
 	        driver.manage().window().setSize(new Dimension(1300, 800));
 			wait.until(ExpectedConditions.titleContains("All campaigns"));
-	        
+			
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new TestFailedException();
 		}
+	}
+	
+	public void setModeratorRole43(boolean tick) {
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		driver.get(editUser43);
+		wait.until(ExpectedConditions.titleContains("Edit User (#43)"));
+		
+		WebElement checkboxModerator = driver.findElement(By.cssSelector("input[value='ROLE_MODERATOR']"));
+		if ( tick && checkboxModerator.getAttribute("checked") == null ) checkboxModerator.click();
+		if ( !tick && checkboxModerator.getAttribute("checked") != null ) checkboxModerator.click();
+		driver.findElement(By.cssSelector("button.action-save")).click();		
 	}
 	
 	public void removeUser(String user) {
@@ -108,14 +134,14 @@ public class Admin extends User {
 
 	}
 
-	public void removeCampaign() {
+	public void removeCampaign(String campaignName) {
 		
 		ACTION.writeln("Remove campaign");		
 		flow.setDriver(driver);
 		
 		try {
 			
-			searchQuery.set("The day before you came");
+			searchQuery.set(campaignName);
 			searchBtn.click();
 			dropdownMenuBtn.click();
 			deleteUserBtn.click();
@@ -130,5 +156,30 @@ public class Admin extends User {
 			throw new TestFailedException();
 		}
 
+	}
+
+	public void confirmModeration() {
+		flow.setDriver(driver);
+
+		// Check email
+		try {
+			/*confirmation(*/ driver.get( getToken(
+				Accesses.getLogins().get("noreply"),	// from
+				this.userEmail,							// to
+				Configuration.getCsss().get("confirmlinks").get("moderation") // confirm link in the letter
+			));
+			
+//			WebDriverWait wait = new WebDriverWait(driver, 5);
+//			wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.moderation-form")));
+
+			acceptedModeration.click();
+			saveChangesModeration.click();
+			
+		} catch (WebDriverException e) {
+			FAILED.writeln("The URL for moderation a new campaign is wrong");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 }

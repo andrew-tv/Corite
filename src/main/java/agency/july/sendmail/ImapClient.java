@@ -229,6 +229,7 @@ public class ImapClient  {
 	        	if (message[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && message[i].getFrom()[0].toString().contains(from)) { 
 //		        	String html = getHTMLFromCoriteMessage(message[i]);
 //		        	Document doc = Jsoup.parse(html);
+//	    	        System.out.println("before getHTMLFromCoriteMessage >> ");
 		        	Element link = Jsoup.parse( getHTMLFromCoriteMessage(message[i]) ).select(selector).first();
 		        	if (link != null) {
 		        		String linkHref = link.attr("href");
