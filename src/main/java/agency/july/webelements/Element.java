@@ -79,10 +79,14 @@ public class Element {
 		
 		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 	}
-
-	public boolean checkAttribute(String attr, String value) {
+/*
+	public boolean checkAttr(String attr, String value) {
 //		refresh();
 		return value.equals( this.el.getAttribute(attr) );
+	}
+*/
+	public String getAttr(String attr) {
+		return getEl().getAttribute(attr);
 	}
 	
 }

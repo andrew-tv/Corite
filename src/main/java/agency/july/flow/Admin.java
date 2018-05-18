@@ -18,6 +18,7 @@ public class Admin extends User {
 	
 	private final String baseurl = Accesses.getUrls().get("adminbase");
 	private final String allUsers = baseurl + "/?entity=User&action=list&menuIndex=9&submenuIndex=-1";
+	private final String allCampaigns = baseurl + "/?entity=Campaign&action=list&menuIndex=1&submenuIndex=-1";
 	private final String editUser43 = baseurl + "/?entity=User&action=edit&id=43";
 
 	// Explore page
@@ -29,6 +30,7 @@ public class Admin extends User {
 	private Element dropdownMenuBtn;	
 	private Element deleteUserBtn;	
 	private Element confirmDeleteUserBtn;
+	private Element detectedItem;
 	
 	// Moderation page	    
 	private Element acceptedModeration;	
@@ -46,6 +48,7 @@ public class Admin extends User {
 		dropdownMenuBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("dropdownMenuBtn")));	
 		deleteUserBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("deleteUserBtn")));	
 		confirmDeleteUserBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("confirmDeleteUserBtn")));
+		detectedItem = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("detectedItem")));
 		// Moderation page	    
 		acceptedModeration = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("moderationpage").get("acceptedModeration")));
 		saveChangesModeration = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("moderationpage").get("saveChangesModeration")));
@@ -66,6 +69,40 @@ public class Admin extends User {
     @Override
 	public String getBaseUrl() {
     	return baseurl;
+    }
+    
+    public String getCampaignId(String campaignTitle) {
+    	
+		ACTION.writeln("Get campaign ID by title : " + campaignTitle);		
+		flow.setDriver(driver);
+		Element searshResultsNumber = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("searshResultsNumber"))); 
+		String campaignId = "";
+		
+		try {
+			
+			WebDriverWait wait = new WebDriverWait(driver, 5);
+			driver.get(allCampaigns);
+			wait.until(ExpectedConditions.titleContains("All campaigns"));
+
+			searchQuery.set(campaignTitle);
+			searchBtn.click();
+			
+			String resNum = searshResultsNumber.getText();
+			if (resNum.equals("1")) {
+				campaignId = detectedItem.getAttr("data-id");
+				PASSED.writeln("Campaign ID has been got. Id = " + campaignId);
+			} else {
+				FAILED.writeln("Campaign ID has not been got");
+			}
+			
+		} catch (TestFailedException e) {
+			throw new TestFailedException();			
+		} catch (Exception e) {
+			FAILED.writeln("Campaign ID has not been got");
+			e.printStackTrace();
+			throw new TestFailedException();
+		}
+    	return campaignId; 
     }
 
 	public void gotoAdminPage() {
@@ -112,9 +149,9 @@ public class Admin extends User {
 		
 		try {
 			
-			//WebDriverWait wait = new WebDriverWait(driver, 5);
+			WebDriverWait wait = new WebDriverWait(driver, 5);
 			driver.get(allUsers);
-			//wait.until(ExpectedConditions.titleContains("All users"));
+			wait.until(ExpectedConditions.titleContains("All users"));
 
 			searchQuery.set(user);
 			searchBtn.click();
@@ -122,12 +159,12 @@ public class Admin extends User {
 			deleteUserBtn.click();
 			confirmDeleteUserBtn.click();
 			
-			Thread.sleep(5000);
-			flow.waitForHtmlHash(By.cssSelector("td.no-results"));
+			wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("td.no-results")));
 			
-		} catch (TestFailedException e) {
-			throw new TestFailedException();
+			PASSED.writeln("User has been removed");
+			
 		} catch (Exception e) {
+			FAILED.writeln("User has not been removed");
 			e.printStackTrace();
 			throw new TestFailedException();
 		}
@@ -163,7 +200,7 @@ public class Admin extends User {
 
 		// Check email
 		try {
-			/*confirmation(*/ driver.get( getToken(
+			driver.get( getToken(
 				Accesses.getLogins().get("noreply"),	// from
 				this.userEmail,							// to
 				Configuration.getCsss().get("confirmlinks").get("moderation") // confirm link in the letter

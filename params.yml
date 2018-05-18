@@ -1,3 +1,5 @@
+# Corite
+
 browser:
     CHROME_HEADLESS
 #browser: FIREFOX_HEADLESS
@@ -50,12 +52,13 @@ csss:
        acceptedModeration: "#campaign_moderationStatus_2"
        saveChangesModeration: "button.action-save"     
     adminpage:
-        searchQuery: "input[name=query]" 
-        searchBtn: "button[type=submit].btn"
-        dropdownMenuBtn: "td div button.btn.dropdown-toggle"
-        deleteUserBtn: "a.action-delete"
-        confirmDeleteUserBtn: "#modal-delete-button"
-       
+       searchQuery: "input[name=query]" 
+       searchBtn: "button[type=submit].btn"
+       dropdownMenuBtn: "td div button.btn.dropdown-toggle"
+       deleteUserBtn: "a.action-delete"
+       confirmDeleteUserBtn: "#modal-delete-button"
+       searshResultsNumber: "h1.title > strong"
+       detectedItem: "tr[data-id]"
 
 flowsss:
     loginlogout:
@@ -152,7 +155,7 @@ flowsss:
         hash: "-1639161134"
 #14
       - csss: ""
-        hash: "-1221524271"
+        hash: "-1932019124"#"-1221524271"
 #15
       - csss: ".mat-menu-panel"
         hash: "2013493558"
@@ -177,11 +180,12 @@ flowsss:
     
 patterns:
 #  id: pattern
-    1: Login | Corite
-    2: Explore | Corite
-    3: "mat-tab-link mat-tab-label-active" # It's classname of the tab Start Campaign if it's active 
-    4: Sign Up | Corite
-    5: All campaigns
+#    1: Login | Corite
+#    2: Explore | Corite
+#    3: "mat-tab-link mat-tab-label-active" # It's classname of the tab Start Campaign if it's active 
+ #   4: Sign Up | Corite
+ #   5: All campaigns
+     1: The day before you came
 
 logger:
     debug: true
@@ -192,6 +196,6 @@ logger:
     failed: true
 
 runtests: 
-   - loginlogout
-   - registerwithemail
+#   - loginlogout
+#   - registerwithemail
    - startcampaign

@@ -103,7 +103,6 @@ public class App {
 								    admin.gotoAdminPage();
 									PASSED.writeln("Admin page has been reached");
 								    admin.removeUser( user.getUserFullName() );
-									PASSED.writeln("User has been removed");
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
 									FAILED.writeln("Registration with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
@@ -148,11 +147,15 @@ public class App {
 						            admin.setModeratorRole43(false);
 						            
 						            nonameUser.checkFirstCampaignInList();
-/*						            
+						            
+						            DEBUG.writeln( admin.getCampaignId(Configuration.getPatterns().get(1)) );
+						            
+						            flow.makeScreenshot();
+						            
 						            root.login();
 									root.gotoAdminPage();
 									root.removeCampaign("The day before you came");
-*/						            
+						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
 									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());

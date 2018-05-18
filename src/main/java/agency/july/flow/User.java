@@ -197,7 +197,7 @@ public class User extends Test {
 			registerSubmit.click();
 			
 			// Check email
-			/*confirmation(*/ driver.get( getToken(
+			driver.get( getToken(
 				Accesses.getLogins().get("noreply"),	// from
 				this.userEmail,								// to
 				Configuration.getCsss().get("confirmlinks").get("registration") // confirm link in the letter
@@ -218,17 +218,7 @@ public class User extends Test {
 			throw new TestFailedException();
 		}
 	}
-/*
-	protected void confirmation(String tokenURL) {
-		if ( tokenURL.isEmpty() ) { // Не получено письмо с токеном подтверждения регистрации
-			FAILED.writeln("The token has not been received in the email or the time was out");
-			throw new TestFailedException();
-		} else { // Все нормально, подтверждаем регистрацию и проверяем это выходом на thankyou page, где находим имя зарегестрированного юзера
-			PASSED.writeln("The token has been received");
-			driver.get(tokenURL);
-		}
-	}
-*/
+
 	protected String getToken (String sender, String recipient, String selector) throws InterruptedException {
 		String tokenURL = "";
 		ACTION.writeln("Waiting for email in \"" + Accesses.getEmail().getFolder() + "\" folder >> ");
