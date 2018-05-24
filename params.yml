@@ -37,6 +37,8 @@ csss:
        menuLogoutBtn: "button.mat-list-link"
        startCampaignTab: "a.mat-tab-link:nth-child(2)"
        firstCampaignInList: "campaign-explore-teaser"
+    explorecappaignpage:
+       buyCoritesBtn: "a[routerlink=invest]"
     startcampaignpage:
        campaignImage: "campaign-group-own-image input"
        campaignSong: "campaign-group-own-song input"
@@ -50,7 +52,14 @@ csss:
        campaignPublish: ".mat-flat-button.mat-primary"
     moderationpage:   
        acceptedModeration: "#campaign_moderationStatus_2"
-       saveChangesModeration: "button.action-save"     
+       saveChangesModeration: "button.action-save"
+    investpage:
+       campaignStatus: "campaign-status"
+       slider: "mat-slider"
+       nextBtn: ".mat-flat-button.mat-primary"
+       buyCoritesBtn: "a[routerlink=invest]"
+       accentBtn: ".mat-flat-button.mat-accent"
+       pledgeBtn: ".mat-flat-button.mat-primary"
     adminpage:
        searchQuery: "input[name=query]" 
        searchBtn: "button[type=submit].btn"
@@ -62,129 +71,16 @@ csss:
 
 flowsss:
     loginlogout:
-#0
-      - csss: "nav.top" # css selector to check html state before running a command
-        hash: "2013493558" # hashcode of the element's innerHTML
-#1
-      - csss: "page-account-login"
-        hash: "1370709605"
-#2
-      - csss: "page-account-login"
-        hash: "1827752133"
-#3
-      - csss: "page-account-login"
-        hash: "1649834707"
-#4
-      - csss: "page-account-login"
-        hash: "1073467074"
-#5
-      - csss: "nav.top" # user is logined
-        hash: "-1639161134"
-#6
-      - csss: ".mat-menu-panel" # logout begins — dropdown menu
-        hash: "1971531868"
 
     registerwithemail:
-#0
-      - csss: "page-account-register" # css selector to check html state before running a command
-        hash: "-476918324" # hashcode of the element's innerHTML
-#1
-      - csss: "nav.top" # login admin to delete just registered user
-        hash: "2013493558"
-#2
-      - csss: "page-account-login"
-        hash: "1370709605"
-#3
-      - csss: "page-account-login"
-        hash: "1827752133"
-#4
-      - csss: "page-account-login"
-        hash: "-1647707845"
-#5
-      - csss: "page-account-login"
-        hash: "-371539158"
-#6
-      - csss: "nav.top" # login admin is completed
-        hash: "1937758725"
-#7
-      - csss: "td.no-results"
-        hash: "-1435612481"
         
     startcampaign:
 #0
-      - csss: "nav.top" # css selector to check html state before running a command
-        hash: "2013493558" # hashcode of the element's innerHTML
-#1
-      - csss: "page-account-login"
-        hash: "1370709605"
-#2
-      - csss: "page-account-login"
-        hash: "1827752133"
-#3
-      - csss: "page-account-login"
-        hash: "85652125"
-#4
-      - csss: "page-account-login"
-        hash: "-1173293044"
-#5
-      - csss: "app-navigation" # user is logined
-        hash: "-2040103819"
-#6
-      - csss: "nav.top" # css selector to check html state before running a command
-        hash: "2013493558" # hashcode of the element's innerHTML
-#7
-      - csss: "page-account-login"
-        hash: "1370709605"
-#8
-      - csss: "page-account-login"
-        hash: "1827752133"
-#9
-      - csss: "page-account-login"
-        hash: "1649834707"
-#10
-      - csss: "page-account-login"
-        hash: "1073467074"
-#11
-      - csss: "app-navigation" # user is logined
-        hash: "-1639161134"
-#12
-      - csss: "app-navigation" # user is logined
-        hash: "-1278885044"
-#13
-      - csss: "app-navigation" # start campaing / press Start Campaing button
-        hash: "-1639161134"
-#14
-      - csss: ""
-        hash: "-1932019124"#"-1221524271"
-#15
-      - csss: ".mat-menu-panel"
-        hash: "2013493558"
-#16
-      - csss: "page-campaign-own-list" # click My campaigns / check creating a campaign
-        hash: "1370709605"      
-#17
-      - csss: ".mat-menu-panel" # logout user begins — dropdown menu
-        hash: "1827752133"
-#18
-      - csss: "nav.top" # login admin to delete just creating campaign
-        hash: "-1647707845"
-#19
-      - csss: "app-root"
-        hash: "-371539158"
-#10
-      - csss: "app-root"
-        hash: "1937758725"
-#21
-      - csss: "app-root"
-        hash: "241679551"
+      - csss: "campaign-explore-teaser" # css selector to check hash of its innerhtml
+        hash: "1327027928" # hashcode of the element's innerHTML
     
 patterns:
 #  id: pattern
-#    1: Login | Corite
-#    2: Explore | Corite
-#    3: "mat-tab-link mat-tab-label-active" # It's classname of the tab Start Campaign if it's active 
- #   4: Sign Up | Corite
- #   5: All campaigns
      1: The day before you came
 
 logger:
@@ -196,6 +92,6 @@ logger:
     failed: true
 
 runtests: 
-#   - loginlogout
-#   - registerwithemail
+   - loginlogout
+   - registerwithemail
    - startcampaign

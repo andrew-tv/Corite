@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -15,6 +14,7 @@ import agency.july.config.models.Accesses;
 import agency.july.config.models.Configuration;
 import agency.july.sendmail.ImapClient;
 import agency.july.webelements.Element;
+import agency.july.webelements.Slider;
 import agency.july.webelements.TextInput;
 
 public class User extends Test {
@@ -32,6 +32,16 @@ public class User extends Test {
 	private Element menuMyCampaign;
 	private Element menuLogoutBtn;
 	private Element userNameTxt;
+	
+	// Explore a Campaign page
+
+	// Invest page
+	private Slider slider;
+	private Element campaignStatus;
+	private Element buyCoritesBtn;
+	private Element nextBtn;
+	private Element accentBtn;
+	private Element pledgeBtn;
 	
 	// Login page
 	private TextInput emailIn;
@@ -55,7 +65,7 @@ public class User extends Test {
 	private TextInput campaignArtist;
 	private TextInput campaignGenre;
 	private Element campaignGenreSelect;
-	private TextInput campaignValue;
+//	private TextInput campaignValue;
 	private TextInput textArea;
 	private Element iagree;	
 	private Element campaignPublish;
@@ -64,16 +74,23 @@ public class User extends Test {
 		super(flow);
 		
 		// Explore page
-		loginBtn =	new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("loginBtn")), By.cssSelector("nav.top"));
-		profileBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("profileBtn")), By.cssSelector("nav.top"));
+		loginBtn =	new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("loginBtn"))/*, By.cssSelector("div.top")*/);
+		profileBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("profileBtn"))/*, By.cssSelector("div.top")*/);
 		menuMyCampaign = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuMyCampaign")));
-		menuLogoutBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuLogoutBtn")), By.cssSelector(".mat-menu-content") );
-		userNameTxt = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("userName")), By.cssSelector("nav.top") );
+		menuLogoutBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuLogoutBtn"))/*, By.cssSelector(".mat-menu-content")*/ );
+		userNameTxt = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("userName"))/*, By.cssSelector("div.top")*/ );
 		startCampaignTab = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("startCampaignTab")));
+		// Invest page
+		slider = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("slider")));
+		campaignStatus = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("campaignStatus")));
+		buyCoritesBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("buyCoritesBtn")));
+		nextBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("nextBtn")));
+		accentBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("accentBtn")));
+		pledgeBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("pledgeBtn")));
 		// Login page
-		emailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("email")), By.cssSelector("page-account-login"));
-		passwordIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("password")), By.cssSelector("page-account-login"));
-		submitBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("submit")), By.cssSelector("page-account-login"));
+		emailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("email"))/*, By.cssSelector("page-account-login")*/);
+		passwordIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("password"))/*, By.cssSelector("page-account-login")*/);
+		submitBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("submit"))/*, By.cssSelector("page-account-login")*/);
 		// Register page
 		yourEmailIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("yourEmailIn")));
 		firstNameIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("firstNameIn")));
@@ -81,7 +98,9 @@ public class User extends Test {
 		passwordNewIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordNewIn")));
 		passwordConfirmIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordConfirmIn")));
 		telephoneIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("telephoneIn")));
-		registerSubmit = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("registerSubmit")), By.cssSelector("page-account-register"));
+		registerSubmit = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("registerSubmit"))/*, By.cssSelector("page-account-register")*/);
+		// Start Campaign page
+//		campaignValue = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValue")));
 	}
 	
 	public User withUser(String user) {
@@ -91,7 +110,7 @@ public class User extends Test {
 		String[] fullName = this.userFullName.split(" +");
 		this.userFirstName = fullName[0];
 		this.userLastName = fullName[1];
-		this.userTel = "+380507502818";
+		this.userTel = "+3805011111111";
 		return this;
 	}
 /*	
@@ -128,7 +147,13 @@ public class User extends Test {
 			if ( !userNameTxt.exists() ) { // The user is not login
 								
 				loginBtn.click();
-				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-account-login")) );
+				try {
+					wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-account-login")) );
+					PASSED.writeln("Page with element 'page-account-login' has been reached");
+				} catch (TimeoutException e) {
+					FAILED.writeln("Page with element 'page-account-login' has not been reached");
+					throw new TestFailedException();
+				}
 				emailIn.set(userEmail);
 				submitBtn.click();
 				passwordIn.set(userPasswd);
@@ -137,8 +162,10 @@ public class User extends Test {
 				if ( !userNameTxt.exists() ) throw new TestFailedException();
 				
 			} else {
-				FAILED.writeln("The user has been already loged in, but expected otherwise : " + this.userEmail);
-				throw new TestFailedException();
+				WARNING.writeln("The user has been already loged in, but expected otherwise : " + this.userEmail 
+						+ ". User name: " + userNameTxt.getText());
+				flow.makeScreenshot();
+//				throw new TestFailedException();
 			}
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
@@ -184,7 +211,6 @@ public class User extends Test {
 			FAILED.writeln("Registration page has not been reached");
 			throw new TestFailedException();
 		}
-
 
 		try {
 				
@@ -237,22 +263,20 @@ public class User extends Test {
 					+ "\n\tRecipient: " + recipient
 					+ "\n\tCss selector of confirm link: " + selector);
 //			throw new TestFailedException();
-		} else { // Все нормально, подтверждаем регистрацию и проверяем это выходом на thankyou page, где находим имя зарегестрированного юзера
+		} else {
 			PASSED.writeln("The token has been received: " + tokenURL);
-//			driver.get(tokenURL);
 		}
 		return tokenURL;
 	}
 	
 	public void startCampaign () {
 		
-		campaignImage = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignImage")), By.cssSelector("page-my-campaigns"));
+		campaignImage = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignImage"))/*, By.cssSelector("page-my-campaigns")*/);
 		campaignSong = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignSong")));
 		campaignName = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignName")));
 		campaignArtist = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignArtist")));
 		campaignGenre = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenre")));
 		campaignGenreSelect = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenreSelect")));
-		campaignValue = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValue")));
 		textArea = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("textArea")));
 		iagree = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("iagree")));
 		campaignPublish = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignPublish")));
@@ -266,17 +290,12 @@ public class User extends Test {
 				
 			startCampaignTab.click(); // Go to start campaign page
 			
-			flow.incSlideNumber();
-			
 			campaignImage.set(new File (Accesses.getPathto().get("files") + "Abba-007.jpg").getAbsolutePath());
-//			wait.until( ExpectedConditions.attributeToBeNotEmpty(driver.findElement(By.cssSelector("app-img > img")), "src") );
-
-			campaignValue.set(Keys.ARROW_RIGHT);
-			campaignValue.set(Keys.ARROW_RIGHT);
-
+//			campaignValue.set(Keys.ARROW_RIGHT);			
+			slider.set(20);
+			
 //			campaignSong.set(new File (Accesses.getPathto().get("files") + "abba__the_day_before_you_came.mp3").getAbsolutePath());
 			campaignSong.set(new File (Accesses.getPathto().get("files") + "chillingmusic.wav").getAbsolutePath());
-//			DEBUG.writeln(driver.findElement(By.cssSelector("div.audio > div > div.slider__max")).getText());
 			try {
 				wait.until( ExpectedConditions.textToBe(By.cssSelector("div.audio > div > div.slider__max"), "00:27") );
 				PASSED.writeln("Audio has been uploaded");
@@ -284,7 +303,7 @@ public class User extends Test {
 				FAILED.writeln("Problem with uploading audio. Timeout 50 sec.");
 			}
 			
-			campaignName.set("The day before you came");
+			campaignName.set(Configuration.getPatterns().get(1));
 			campaignArtist.set("ABBA");
 			campaignGenre.set("Pop");
 			campaignGenreSelect.click();
@@ -324,10 +343,82 @@ public class User extends Test {
 		}
 	}
 	
+	public void buyCorites (String campaignId) {
+		
+		TextInput cardNumber = new TextInput(this.flow, By.cssSelector ("input[name=cardnumber]"));
+		TextInput expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
+		TextInput cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
+		TextInput zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
+		
+		ACTION.writeln("Buy corites");
+		flow.setDriver(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+
+		// Go to campaign page
+		driver.get(getBaseUrl() + "/explore/" + campaignId);
+		try {
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-view")) );
+			PASSED.writeln("Page with element 'page-explore-view' has been reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Page with element 'page-explore-view' has not been reached");
+//			throw new TestFailedException();
+		}
+		
+		// Check if the campaign is active
+		String status = campaignStatus.getText();
+		if ( status.equals("ACTIVE") ) {
+			PASSED.writeln("Campaign is active");
+		} else {
+			FAILED.writeln("Campaign is not active. Expected – active");
+//			throw new TestFailedException();
+		}
+		
+		buyCoritesBtn.click();
+		
+		// Go to invest page
+		try {
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-invest")) );
+			PASSED.writeln("Page with element 'page-explore-invest' has been reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Page with element 'page-explore-invest' has not been reached");
+//			throw new TestFailedException();
+		}
+				
+		slider.set(100); // Buy all corites
+		
+		boolean userHaveCard = accentBtn.exists(); // User have creditcard
+		
+		DEBUG.writeln("User have credit card: " + userHaveCard);
+		if ( userHaveCard ) 
+			accentBtn.click();
+		else
+			nextBtn.click();
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		driver.switchTo().frame(0);
+		
+		cardNumber.set("4242424242424242");
+		expDate.set("424");
+		cvc.set("242");
+		zip.set("42424");
+		
+		driver.switchTo().defaultContent();
+		
+		if ( userHaveCard ) 
+			nextBtn.click();
+		else
+			accentBtn.click();
+	}
+	
     public void teardown () {
     	driver.get(getBaseUrl() + "/logout");
     	driver.quit();
     }
-
 
 }

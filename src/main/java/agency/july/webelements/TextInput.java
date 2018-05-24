@@ -11,11 +11,11 @@ public class TextInput extends Element {
 	public TextInput(IFlow parentPage, By by) {
 		super(parentPage, by);
 	}
-
+/*
 	public TextInput(Flow parentPage, By by, By bytoWait) {
 		super(parentPage, by, bytoWait);
 	}
-
+*/
 	// Ввод текста в строку ввода
 	public void set(String value) {
 

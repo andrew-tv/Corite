@@ -2,8 +2,12 @@ package agency.july.flow;
 
 import static agency.july.logger.Logevent.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -87,8 +91,8 @@ public class Admin extends User {
 			searchQuery.set(campaignTitle);
 			searchBtn.click();
 			
-			String resNum = searshResultsNumber.getText();
-			if (resNum.equals("1")) {
+			int resNum = Integer.parseInt( searshResultsNumber.getText() );
+			if (resNum > 0) {
 				campaignId = detectedItem.getAttr("data-id");
 				PASSED.writeln("Campaign ID has been got. Id = " + campaignId);
 			} else {
@@ -146,6 +150,7 @@ public class Admin extends User {
 		
 		ACTION.writeln("Remove an user : " + user);		
 		flow.setDriver(driver);
+		driver.get(allUsers);
 		
 		try {
 			
@@ -159,9 +164,12 @@ public class Admin extends User {
 			deleteUserBtn.click();
 			confirmDeleteUserBtn.click();
 			
-			wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("td.no-results")));
-			
-			PASSED.writeln("User has been removed");
+			try {
+				wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("td.no-results")));
+				PASSED.writeln("User has been removed");
+			} catch (TimeoutException e) {
+				FAILED.writeln("User has not been removed or there ara other user(s) with the same full name");				
+			}
 			
 		} catch (Exception e) {
 			FAILED.writeln("User has not been removed");
@@ -175,6 +183,9 @@ public class Admin extends User {
 		
 		ACTION.writeln("Remove campaign");		
 		flow.setDriver(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		driver.get(allCampaigns);
+		wait.until(ExpectedConditions.titleContains("All campaigns"));
 		
 		try {
 			
@@ -184,7 +195,12 @@ public class Admin extends User {
 			deleteUserBtn.click();
 			confirmDeleteUserBtn.click();
 			
-			flow.waitForHtmlHash(By.cssSelector("td.no-results"));
+			try {
+				wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("td.no-results")));
+				PASSED.writeln("Campaign has been removed");
+			} catch (TimeoutException e) {
+				FAILED.writeln("Campaign has not been removed or there ara other campaign(s) with the same name");				
+			}
 			
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
@@ -193,6 +209,25 @@ public class Admin extends User {
 			throw new TestFailedException();
 		}
 
+	}
+	
+	public void removeCampaignOrders(String campaignId) {
+		
+		ACTION.writeln( "Remove all orders of campaign: " + campaignId );		
+		flow.setDriver(driver);
+		driver.get(this.getBaseUrl() + "?entity=Order&action=list");
+
+		List<WebElement> rows = driver.findElements(By.cssSelector("tr"));
+		
+		for(int i = 1; i<rows.size(); i++) {
+			WebElement foundCampaign = rows.get(i).findElement(By.cssSelector("td[data-label=Campaign] > a"));
+			if ( foundCampaign.getText().equals("Campaign #" + campaignId) ) {
+				WebElement deleteBtn = rows.get(i).findElement(By.cssSelector(".text-danger.action-delete"));
+				deleteBtn.click();
+				confirmDeleteUserBtn.click();
+				rows = driver.findElements(By.cssSelector("tr"));
+			}			
+		}
 	}
 
 	public void confirmModeration() {
@@ -206,9 +241,6 @@ public class Admin extends User {
 				Configuration.getCsss().get("confirmlinks").get("moderation") // confirm link in the letter
 			));
 			
-//			WebDriverWait wait = new WebDriverWait(driver, 5);
-//			wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.moderation-form")));
-
 			acceptedModeration.click();
 			saveChangesModeration.click();
 			
@@ -219,4 +251,5 @@ public class Admin extends User {
 			e.printStackTrace();
 		}		
 	}
+
 }

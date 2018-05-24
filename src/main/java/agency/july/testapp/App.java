@@ -8,8 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.yaml.snakeyaml.Yaml;
+
+import com.gargoylesoftware.htmlunit.WebConsole.Logger;
 
 import agency.july.config.models.Accesses;
 import agency.july.config.models.Configuration;
@@ -73,10 +76,10 @@ public class App {
 						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
-									FAILED.writeln("Login or logout user with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
+									FAILED.writeln("Login or logout user with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
 								} catch (Exception e) {
 									flow.makeScreenshot();
-									FAILED.writeln("Login or logout user with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
+									FAILED.writeln("Login or logout user with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
 									e.printStackTrace();
 								} finally {
 						            INFO.writeln("Login and logout user test finished");
@@ -93,26 +96,23 @@ public class App {
 							threadRegisterWithEmail = new Thread (new Runnable() {
 							public void run() {
 								Flow flow = new Flow("registerwithemail");
-					            User user = new User( flow ).withUser( "newuser" );
+					            User newuser = new User( flow ).withUser( "newuser" );
 					            Admin admin = new Admin( flow ).withUser( "root" );
 								try {
-									user.register();
-									PASSED.writeln("Registration an user");
-									admin.login();
-									PASSED.writeln("Login the admin");
-								    admin.gotoAdminPage();
-									PASSED.writeln("Admin page has been reached");
-								    admin.removeUser( user.getUserFullName() );
+									newuser.register();
+//									admin.login();
+//								    admin.gotoAdminPage();
+//								    admin.removeUser( user.getUserFullName() );
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
-									FAILED.writeln("Registration with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
+									FAILED.writeln("Registration with email '" + newuser.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
 								} catch (Exception e) {
 									flow.makeScreenshot();
-									FAILED.writeln("Registration with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
+									FAILED.writeln("Registration with email '" + newuser.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
 									e.printStackTrace();
 								} finally {
 						            INFO.writeln("Registration with email test finished");
-						            user.teardown();
+						            newuser.teardown();
 						            admin.teardown();
 								}
 							}
@@ -130,15 +130,15 @@ public class App {
 
 					            Test nonameUser = new User( flow );
 								User user = new User( flow ).withUser( "test" );
+					            User newuser = new User( flow ).withUser( "newuser" );
 					            Admin root = new Admin( flow ).withUser( "root" ); // Supper admin
 					            Admin admin = new Admin( flow ).withUser( "admin" );
 								
 								try {			
-									
+						            newuser.register();
+						            
 									admin.login(); 
 						            admin.setModeratorRole43(true);
-						            
-						            flow.incSlideNumber();
 						            
 						            user.login(); 
 						            user.startCampaign();
@@ -147,27 +147,37 @@ public class App {
 						            admin.setModeratorRole43(false);
 						            
 						            nonameUser.checkFirstCampaignInList();
+
+						            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(1));
 						            
-						            DEBUG.writeln( admin.getCampaignId(Configuration.getPatterns().get(1)) );
-						            
-						            flow.makeScreenshot();
+						            newuser.login();
+						            newuser.buyCorites (campaignId); // With canceling for new users
+
+						            user.buyCorites (campaignId);
 						            
 						            root.login();
 									root.gotoAdminPage();
-									root.removeCampaign("The day before you came");
+									
+						            root.removeUser( newuser.getUserFullName() );
+
+									root.removeCampaignOrders( campaignId );
+						            
+									root.removeCampaign(Configuration.getPatterns().get(1));
 						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
-									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
+									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
 								} catch (Exception e) {
 									flow.makeScreenshot();
-									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlide());
+									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
 									e.printStackTrace();
 								} finally {
 						            INFO.writeln("Start Campaign test finished");
 						            user.teardown();
+						            newuser.teardown();
 						            root.teardown();
 						            admin.teardown();
+						            nonameUser.teardown();
 								}
 							}
 						});

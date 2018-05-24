@@ -24,12 +24,12 @@ public class Element {
 		this.bytoWait = null;
 	}
 	
-	public Element (IFlow parentFlow, By by, By bytoWait) {
+/*	public Element (IFlow parentFlow, By by, By bytoWait) {
 		this.parentFlow = parentFlow;
 		this.by = by;
 		this.bytoWait = bytoWait;
 	}
-	
+*/	
 	public WebElement getEl() {
 		refresh();
 		return el;

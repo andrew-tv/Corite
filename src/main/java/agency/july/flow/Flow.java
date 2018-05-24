@@ -23,7 +23,7 @@ public class Flow implements IFlow {
 	private String flowName;
 	private String pathToScreenshots;
 	private List< Map < String, String > > flowMap;
-	private int currentSlide = 0;
+	private int currentSlideNumber = 0;
 	
 	private int dutycycle = 500;
 	private int repetitions = 16;
@@ -38,16 +38,16 @@ public class Flow implements IFlow {
 		return flowName;
 	}
 
-	public int getCurrentSlide() {
-		return currentSlide;
+	public int getCurrentSlideNumber() {
+		return currentSlideNumber;
 	}
-
+/*
 	public int nextHashBefore() {
 		return Integer.parseInt( flowMap.get(currentSlide).get("hash") );
 	}
-	
+*/	
 	public void incSlideNumber() {
-		currentSlide++;
+		currentSlideNumber++;
 	}
 	
 	public String getPathToScreenshots() {
@@ -72,7 +72,7 @@ public class Flow implements IFlow {
 		try {
 			FileUtils.copyFile(screenshot, new File(this.pathToScreenshots
 					+ flowName + "/"
-					+ "id_" + this.currentSlide 
+					+ "id_" + this.currentSlideNumber 
 					+ "_hash_" + java.util.Arrays.hashCode(bytes) 
 					+ "_" + screenshot.getName().substring(15) 
 					));
@@ -91,41 +91,22 @@ public class Flow implements IFlow {
 	
 	@Override
 	public int getExpectedHtmlHash() {
-		return Integer.parseInt( flowMap.get(this.currentSlide).get("hash") );
+		return Integer.parseInt( flowMap.get(this.currentSlideNumber).get("hash") );
+	}
+	
+	private String getCurrentCssSelector() {
+		return flowMap.get(this.currentSlideNumber).get("csss");
+	}
+	
+	public boolean checkHtmlHash() {
+		
+		int hash = this.driver.findElement(By.cssSelector(getCurrentCssSelector()))
+		.getAttribute("innerHTML").replaceAll("\\d+|src=.+?\\\"", "").hashCode();
+		int expectedHash = getExpectedHtmlHash();
+		currentSlideNumber++;
+		return hash == expectedHash;
 	}
 
-/*
-	@Override
-	public void waitForHtmlHash() {
-		String cssSelector = flowMap.get(this.currentSlide).get("csss");
-		Element el = new Element(this, By.cssSelector( cssSelector ));
-		if ( dutycycle > 0 && repetitions > 0 ) { // Ожидание задано
-			int expectedHash = Integer.parseInt( flowMap.get(this.currentSlide).get("hash") );
-		// Цикл ожидания события (изменения состояния)
-			int num = 0;
-			try {
-				
-				int hash = el.getHtmlHash();
-				while ( ( expectedHash != hash ) && num < repetitions ) {
-					Thread.sleep(dutycycle);
-					hash = el.getHtmlHash();
-					num++;
-				}
-				
-				DEBUG.writeln("Wait for html hash id: " + this.currentSlide + ". Times: " + num + ". Hash: " + hash + ". Csss: " + cssSelector);
-
-				if (num == repetitions) {
-					WARNING.writeln("Slide " + this.currentSlide + ". Html hash : " + hash );
-					makeScreenshot(); // Недождались необходимого скриншота. Сохраняем такой какой есть
-//					throw new ScreenshotTimeoutException();
-				}
-			} catch (InterruptedException e) {
-				makeScreenshot();
-				e.printStackTrace();
-			}
-		}
-	}
-*/	
 	@Override
 	public void waitForHtmlHash(By by) {
 		Element el = new Element(this, by);
@@ -142,10 +123,10 @@ public class Flow implements IFlow {
 					num++;
 				}
 				
-				DEBUG.writeln("Wait for html hash id: " + this.currentSlide + ". Times: " + num + ". Expected hash: " + expectedHash + ". " + by);
+				DEBUG.writeln("Wait for html hash id: " + this.currentSlideNumber + ". Times: " + num + ". Expected hash: " + expectedHash + ". " + by);
 
 				if (num == repetitions) {
-					WARNING.writeln("Slide " + this.currentSlide + ". Html hash : " + hash );
+					WARNING.writeln("Slide " + this.currentSlideNumber + ". Html hash : " + hash );
 					makeScreenshot(); // Недождались необходимого скриншота. Сохраняем такой какой есть
 //					throw new ScreenshotTimeoutException();
 				}
