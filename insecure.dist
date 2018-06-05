@@ -1,19 +1,28 @@
 logins:
 # nameId: login
-    noreply: noreply@..
+    noreply: no-reply@..
     root: root@..
+    admin: admin@..
     test: test@..
     newuser: newuser@..
+    newuser_startcampaign: newuser-startcampaign@..
+    incorrectcard: incorrect-card@..
 passwds:
-# nameId: passwd
+# nameId: 111111
     root: 111111
+    admin: 111111
     test: 111111
     newuser: 111111
+    newuser_startcampaign: 111111
+    incorrectcard: 111111
 usernames:
 # nameId: username
     root: fname1 lname1
-    test: fname2 lname2
-    newuser: fname3 lname4
+    admin: fname2 lname2
+    test: fname3 lname3
+    newuser: fname4 lname4
+    newuser_startcampaign: fname5 lname5
+    incorrectcard: fname6 lname6
 
 urls:
     dev: https://.dev.com
@@ -31,5 +40,5 @@ email:
     store: imaps
     connect: mail.plur.se
     folder: inbox
-    account: autotest@july.agency
-    password: ghbdtn
+    account: account@..
+    password: 111111

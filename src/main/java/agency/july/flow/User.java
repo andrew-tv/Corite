@@ -30,6 +30,10 @@ public class User extends Test {
 	protected String userPasswd = "";
 	protected String userTel = "";
 	
+	// Common elements
+	private Element matError;
+	private Element submitBtn;
+	
 	// Explore page
 	private Element loginBtn;
 	protected Element profileBtn;
@@ -43,14 +47,14 @@ public class User extends Test {
 	private Slider slider;
 	private Element campaignStatus;
 	private Element buyCoritesBtn;
-	private Element nextBtn;
+//	private Element nextBtn;
 	private Element accentBtn;
 	private Element thankyou;
 	
 	// Login page
 	private TextInput emailIn;
 	private TextInput passwordIn;
-	private Element submitBtn;
+//	private Element submitBtn;
 
 	// Register page
 	private TextInput yourEmailIn;
@@ -59,9 +63,8 @@ public class User extends Test {
 	private TextInput passwordNewIn;
 	private TextInput passwordConfirmIn;
 	private TextInput telephoneIn;
-	private Element registerSubmit;
+//	private Element registerSubmit;
 	private Element startCampaignTab;
-//	private Element matError;
 	
 	// Start Campaign page
 	private TextInput campaignImage;
@@ -73,29 +76,31 @@ public class User extends Test {
 //	private TextInput campaignValue;
 	private TextInput textArea;
 	private Element iagree;	
-	private Element campaignPublish;
+//	private Element campaignPublish;
 	
 	public User(Flow flow) {
 		super(flow);
 		
+		// Common elements
+		matError = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("commonelements").get("matError")));
+		submitBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("commonelements").get("submitBtn")) );
 		// Explore page
-		loginBtn =	new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("loginBtn"))/*, By.cssSelector("div.top")*/);
-		profileBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("profileBtn"))/*, By.cssSelector("div.top")*/);
+		loginBtn =	new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("loginBtn")) );
+		profileBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("profileBtn")) );
 		menuMyCampaign = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuMyCampaign")));
-		menuLogoutBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuLogoutBtn"))/*, By.cssSelector(".mat-menu-content")*/ );
-		userNameTxt = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("userName"))/*, By.cssSelector("div.top")*/ );
+		menuLogoutBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuLogoutBtn")) );
+		userNameTxt = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("userName")) );
 		startCampaignTab = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("startCampaignTab")));
 		// Invest page
 		slider = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("slider")));
 		campaignStatus = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("campaignStatus")));
 		buyCoritesBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("buyCoritesBtn")));
-		nextBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("nextBtn")));
+//		nextBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("nextBtn")));
 		accentBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("accentBtn")));
 		thankyou = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("thankyou")));
 		// Login page
-		emailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("email"))/*, By.cssSelector("page-account-login")*/);
-		passwordIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("password"))/*, By.cssSelector("page-account-login")*/);
-		submitBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("submit"))/*, By.cssSelector("page-account-login")*/);
+		emailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("email")) );
+		passwordIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("password")) );
 		// Register page
 		yourEmailIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("yourEmailIn")));
 		firstNameIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("firstNameIn")));
@@ -103,8 +108,7 @@ public class User extends Test {
 		passwordNewIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordNewIn")));
 		passwordConfirmIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordConfirmIn")));
 		telephoneIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("telephoneIn")));
-		registerSubmit = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("registerSubmit")));
-//		matError = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("matError")));
+//		registerSubmit = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("registerSubmit")));
 		// Start Campaign page
 //		campaignValue = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValue")));
 	}
@@ -234,7 +238,7 @@ public class User extends Test {
 			telephoneIn.set(userTel);
 			
 			Thread.sleep(1000); // Без этой задержки не работает. Почему???
-			registerSubmit.click();
+			submitBtn.click();
 
 			checkFormFillingError();
 			// Check email
@@ -300,7 +304,7 @@ public class User extends Test {
 		campaignGenreSelect = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenreSelect")));
 		textArea = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("textArea")));
 		iagree = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("iagree")));
-		campaignPublish = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignPublish")));
+//		campaignPublish = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignPublish")));
 
 		
 		ACTION.writeln("Start Campaign ");
@@ -333,9 +337,9 @@ public class User extends Test {
 
 			wait.withTimeout(5, TimeUnit.SECONDS);
 			
-			campaignPublish.click();
+			submitBtn.click();
 			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector(".mat-flat-button.mat-primary.ng-star-inserted")) ); //
-			campaignPublish.click();
+			submitBtn.click();
 			
 			try {
 				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-campaign-own-edit")) ); //
@@ -425,7 +429,7 @@ public class User extends Test {
 		if ( userHaveCard ) 
 			accentBtn.click();
 		else
-			nextBtn.click();
+			submitBtn.click();
 		
 		if ( iframe.exists() ) {
 		
@@ -446,7 +450,7 @@ public class User extends Test {
 			driver.switchTo().defaultContent();
 			
 			if ( userHaveCard ) {
-				nextBtn.click(); // Get corites
+				submitBtn.click(); // Get corites
 				
 				if ( thankyou.exists() ) {
 				
@@ -469,12 +473,135 @@ public class User extends Test {
 			
 		} else {
 			FAILED.writeln("iframe for credit card information is not exist. See screenshot: 'Error_buyCorites_2'");			
-			flow.makeScreenshot("Error_buyCorites_2_");
+			flow.makeErrorScreenshot();
+		}
+	}
+	
+	public void buyCoritesIncorrectCard (String campaignId, String cardNumber) {
+		
+		TextInput cardNumberIn = new TextInput(this.flow, By.cssSelector ("input[name=cardnumber]"));
+		TextInput expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
+		TextInput cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
+		TextInput zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
+		Element iframe = new Element(this.flow, By.cssSelector ("ngx-stripe-card iframe"));
+		
+		ACTION.writeln("Buy corites with card #" + cardNumber);
+		flow.setDriver(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+
+		// Go to campaign page
+		driver.get(getBaseUrl() + "/explore/" + campaignId);
+		try {
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-view")) );
+			PASSED.writeln("Page with element 'page-explore-view' has been reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Page with element 'page-explore-view' has not been reached");
+			flow.makeErrorScreenshot();
+//			throw new TestFailedException();
+		}
+		
+		// Check if the campaign is active
+		if ( campaignStatus.getText().equals("ACTIVE") ) {
+			PASSED.writeln("Campaign is active");
+		} else {
+			FAILED.writeln("Campaign is not active. Expected – active");
+			flow.makeErrorScreenshot();
+//			throw new TestFailedException();
+		}
+		
+		buyCoritesBtn.click();
+		
+		// Go to invest page
+		try {
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-invest")) );
+			PASSED.writeln("Page with element 'page-explore-invest' has been reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Page with element 'page-explore-invest' has not been reached");
+			flow.makeErrorScreenshot();
+//			throw new TestFailedException();
+		}
+				
+		slider.set(50); // Buy a half of corites
+		
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		boolean userHaveCard = accentBtn.exists(); // User have creditcard
+		
+		flow.makeScreenshot("A");
+		
+		if ( userHaveCard ) 
+			accentBtn.click();
+		else
+			submitBtn.click();
+		
+		if ( iframe.exists() ) {
+		
+			driver.switchTo().frame(iframe.getEl());
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			cardNumberIn.set(cardNumber);
+			expDate.set("424");
+			cvc.set("242");
+			zip.set("42424");
+			
+			driver.switchTo().defaultContent();
+			
+			try {
+				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("mat-error")) );
+				PASSED.writeln("Incorrect card was declined with message: '" + matError.getText() + "'");
+			} catch (TimeoutException e) {
+				FAILED.writeln("Incorrect card was not declined");
+				flow.makeErrorScreenshot();
+//				throw new TestFailedException();
+			}			
+			
+			flow.makeScreenshot("B");
+/*			if ( userHaveCard ) {
+				nextBtn.click(); // Get corites
+				
+				if ( thankyou.exists() ) {
+				
+					driver.get(getBaseUrl() + "/explore/" + campaignId);
+					
+					// Check if the campaign is funded
+					if ( campaignStatus.exists() && campaignStatus.getText().equals("FUNDED") ) {
+						PASSED.writeln("Campaign is funded. Campaign Id: " + campaignId);
+					} else {
+						FAILED.writeln("Campaign is '" + campaignStatus.getText() + "'. Expected – funded. Campaign Id: " + campaignId);
+						flow.makeErrorScreenshot();
+			//			throw new TestFailedException();
+					}
+				} else {
+					FAILED.writeln("Thankyou invest page was not reached. See screenshot: 'Error_buyCorites_1'");
+					flow.makeErrorScreenshot();
+				}
+			} else
+*/				accentBtn.click(); // Cancel getting corites
+			
+		} else {
+			FAILED.writeln("iframe for credit card information is not exist");			
+			flow.makeErrorScreenshot();
 		}
 	}
 	
     public void teardown () {
-    	driver.get(getBaseUrl() + "/logout");
+    	try {
+    		driver.get(getBaseUrl() + "/logout");
+    	} catch (org.openqa.selenium.UnhandledAlertException e) {
+			FAILED.writeln("User logout error. User email '" + this.getUserEmail() + "'");			
+			flow.makeErrorScreenshot();    		
+    	}
     	driver.quit();
     }
 

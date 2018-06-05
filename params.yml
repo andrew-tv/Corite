@@ -14,10 +14,13 @@ csss:
        moderation: "a.inform-campaign-to-moderate"
        accepted: "a.inform-creator-about-accept"
        declined: "a[data-e2e=informCreatorAboutDecline]"
+    commonelements:
+       matError: "mat-error"
+       submitBtn: "form .mat-flat-button.mat-primary"
     loginpage:
        email: "[name=email]"
        password: "[name=password]"
-       submit: "form .mat-flat-button.mat-primary"
+       #submit: "form .mat-flat-button.mat-primary"
     registerpage:
        yourEmailIn: "input[name=email]"
        firstNameIn: "input[name=fname]"
@@ -25,9 +28,8 @@ csss:
        passwordNewIn: "input[name=new-password]"
        passwordConfirmIn: "input[name=new-password-confirm]"
        telephoneIn: "input[name=phone]"
-       registerSubmit: "button.mat-flat-button"
+       #registerSubmit: "button.mat-flat-button"
        registerConfirmationTxt: "page-account-register > main > account-register > div > p > strong" # email of a jast registered user
-       matError: "mat-error"
     thankyoupage:
        txtContent: "app-root"
     explorepage:
@@ -51,17 +53,17 @@ csss:
        campaignValue: "mat-slider"
        textArea: "textarea"
        iagree: ".mat-checkbox-inner-container"
-       campaignPublish: ".mat-flat-button.mat-primary"
+       #campaignPublish: ".mat-flat-button.mat-primary"
     moderationpage:   
        acceptedModeration: "#campaign_moderationStatus_2"
        saveChangesModeration: "button.action-save"
     investpage:
        campaignStatus: "campaign-status"
        slider: "mat-slider"
-       nextBtn: ".mat-flat-button.mat-primary"
+       #nextBtn: ".mat-flat-button.mat-primary"
        buyCoritesBtn: "a[routerlink=invest]"
        accentBtn: ".mat-flat-button.mat-accent"
-       pledgeBtn: ".mat-flat-button.mat-primary"
+       #pledgeBtn: ".mat-flat-button.mat-primary"
        thankyou: "campaign-invest-thankyou"
     adminpage:
        searchQuery: "input[name=query]" 
@@ -107,6 +109,8 @@ flowsss:
 #2
       - csss: "page-explore-view"
         hash: "2"
+        
+    incorrectcard:
     
 patterns:
 #  id: pattern
@@ -123,5 +127,6 @@ logger:
 runtests: 
 #   - loginlogout
 #   - registerwithemail
-   - startcampaign
+#   - startcampaign
 #   - releaseinformation
+    - incorrectcard

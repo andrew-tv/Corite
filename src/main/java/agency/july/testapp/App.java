@@ -52,6 +52,7 @@ public class App {
 				Thread threadRegisterWithEmail = null;
 				Thread threadStartcampaign = null;
 				Thread threadReleaseinformation = null;
+				Thread threadIncorrectcard = null;
 				
 				// Основное цикл по тестам
 				List <String> runningTests = Configuration.getRuntests();
@@ -154,14 +155,12 @@ public class App {
 
 						            user.buyCorites (campaignId);
 						            
-//						            user.fillReleaseInfo(campaignId);
-
 						            root.login();
 									root.gotoAdminPage();
 						            root.removeUser( newuser.getUserFullName() );
 //*						            
-//									root.removeCampaignOrders( campaignId );
-//									root.removeCampaign(Configuration.getPatterns().get(1));
+									root.removeCampaignOrders( campaignId );
+									root.removeCampaign(Configuration.getPatterns().get(1));
 //*/						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
@@ -231,6 +230,35 @@ public class App {
 							threadReleaseinformation.setName("ReleaseInformation");
 							threadReleaseinformation.start();
 							break;
+							
+						case "incorrectcard" : 
+							threadIncorrectcard = new Thread (new Runnable() {
+								public void run() {
+									
+									Flow flow = new Flow( "incorrectcard" );
+									User user = new User( flow ).withUser( "incorrectcard" );
+									
+									try {			
+										
+							            // Prepare initial state
+										
+							            // Begin test
+							            user.login(); 
+							            user.buyCoritesIncorrectCard("289", "4242424242424241");
+							            							            
+									} catch (Exception e) {
+										flow.makeScreenshot();
+										FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+										e.printStackTrace();
+									} finally {
+							            INFO.writeln("Test of payment with incorrect card was finished");
+							            user.teardown();
+									}
+								}
+							});
+							threadIncorrectcard.setName("IncorrectCard");
+							threadIncorrectcard.start();
+							break;
 
 					}
 				}
@@ -240,6 +268,7 @@ public class App {
 				if (threadRegisterWithEmail != null) threadRegisterWithEmail.join();
 				if (threadStartcampaign != null) threadStartcampaign.join();
 				if (threadReleaseinformation != null) threadReleaseinformation.join();
+				if (threadIncorrectcard != null) threadIncorrectcard.join();
 
 			} catch (FileNotFoundException e1) {
 				System.out.println("Could not load configuration file: ./params.yml");
