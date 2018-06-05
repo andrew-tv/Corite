@@ -3,12 +3,16 @@ package agency.july.flow;
 import static agency.july.logger.Logevent.*;
 
 import java.io.File;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.JavascriptExecutor;
 
 import agency.july.config.models.Accesses;
 import agency.july.config.models.Configuration;
@@ -41,7 +45,7 @@ public class User extends Test {
 	private Element buyCoritesBtn;
 	private Element nextBtn;
 	private Element accentBtn;
-	private Element pledgeBtn;
+	private Element thankyou;
 	
 	// Login page
 	private TextInput emailIn;
@@ -57,6 +61,7 @@ public class User extends Test {
 	private TextInput telephoneIn;
 	private Element registerSubmit;
 	private Element startCampaignTab;
+//	private Element matError;
 	
 	// Start Campaign page
 	private TextInput campaignImage;
@@ -86,7 +91,7 @@ public class User extends Test {
 		buyCoritesBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("buyCoritesBtn")));
 		nextBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("nextBtn")));
 		accentBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("accentBtn")));
-		pledgeBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("pledgeBtn")));
+		thankyou = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("thankyou")));
 		// Login page
 		emailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("email"))/*, By.cssSelector("page-account-login")*/);
 		passwordIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("password"))/*, By.cssSelector("page-account-login")*/);
@@ -98,7 +103,8 @@ public class User extends Test {
 		passwordNewIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordNewIn")));
 		passwordConfirmIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordConfirmIn")));
 		telephoneIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("telephoneIn")));
-		registerSubmit = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("registerSubmit"))/*, By.cssSelector("page-account-register")*/);
+		registerSubmit = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("registerSubmit")));
+//		matError = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("matError")));
 		// Start Campaign page
 //		campaignValue = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValue")));
 	}
@@ -144,28 +150,34 @@ public class User extends Test {
 		
 		try {
 			
-			if ( !userNameTxt.exists() ) { // The user is not login
+			if ( loginBtn.exists() ) { // The user is not login
 								
 				loginBtn.click();
 				try {
 					wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-account-login")) );
-					PASSED.writeln("Page with element 'page-account-login' has been reached");
+					PASSED.writeln("Page with element 'page-account-login' was reached");
 				} catch (TimeoutException e) {
-					FAILED.writeln("Page with element 'page-account-login' has not been reached");
+					FAILED.writeln("Page with element 'page-account-login' was't reached");
 					throw new TestFailedException();
 				}
 				emailIn.set(userEmail);
 				submitBtn.click();
+				checkFormFillingError();
 				passwordIn.set(userPasswd);
 				submitBtn.click();
 				
-				if ( !userNameTxt.exists() ) throw new TestFailedException();
+//				wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-list")));
+
+				if ( !userNameTxt.exists() ) checkFormFillingError();
+				PASSED.writeln("User '" + userNameTxt.getText() + "' logged in");
 				
 			} else {
-				WARNING.writeln("The user has been already loged in, but expected otherwise : " + this.userEmail 
-						+ ". User name: " + userNameTxt.getText());
-				flow.makeScreenshot();
-//				throw new TestFailedException();
+				if ( userNameTxt.exists() ) {
+					WARNING.writeln("The user has been already logged in, but expected otherwise : " + this.userEmail 
+							+ ". User name: " + userNameTxt.getText());
+//					flow.makeScreenshot();
+//					throw new TestFailedException();
+				}
 			}
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
@@ -220,14 +232,22 @@ public class User extends Test {
 			passwordNewIn.set(userPasswd);
 			passwordConfirmIn.set(userPasswd);
 			telephoneIn.set(userTel);
-			registerSubmit.click();
 			
+			Thread.sleep(1000); // Без этой задержки не работает. Почему???
+			registerSubmit.click();
+
+			checkFormFillingError();
 			// Check email
-			driver.get( getToken(
-				Accesses.getLogins().get("noreply"),	// from
-				this.userEmail,								// to
-				Configuration.getCsss().get("confirmlinks").get("registration") // confirm link in the letter
-			));
+			try {
+				driver.get( getToken(
+					Accesses.getLogins().get("noreply"),	// from
+					this.getUserEmail(),								// to
+					Configuration.getCsss().get("confirmlinks").get("registration") // confirm link in the letter
+				));
+			} catch (TestFailedException e) {
+				FAILED.writeln("User registration was failed. User email: " + this.getUserEmail() );
+				throw new TestFailedException();				
+			} 
 			
 			try {
 				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-account-check")) );
@@ -236,6 +256,7 @@ public class User extends Test {
 				FAILED.writeln("Thankyou page  of registration has not been reached");
 //				throw new TestFailedException();
 			}
+			
 						
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
@@ -262,7 +283,7 @@ public class User extends Test {
 					+ "\n\tSender: " + sender
 					+ "\n\tRecipient: " + recipient
 					+ "\n\tCss selector of confirm link: " + selector);
-//			throw new TestFailedException();
+			throw new TestFailedException();
 		} else {
 			PASSED.writeln("The token has been received: " + tokenURL);
 		}
@@ -349,6 +370,7 @@ public class User extends Test {
 		TextInput expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
 		TextInput cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
 		TextInput zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
+		Element iframe = new Element(this.flow, By.cssSelector ("ngx-stripe-card iframe"));
 		
 		ACTION.writeln("Buy corites");
 		flow.setDriver(driver);
@@ -361,15 +383,16 @@ public class User extends Test {
 			PASSED.writeln("Page with element 'page-explore-view' has been reached");
 		} catch (TimeoutException e) {
 			FAILED.writeln("Page with element 'page-explore-view' has not been reached");
+			flow.makeErrorScreenshot();
 //			throw new TestFailedException();
 		}
 		
 		// Check if the campaign is active
-		String status = campaignStatus.getText();
-		if ( status.equals("ACTIVE") ) {
+		if ( campaignStatus.getText().equals("ACTIVE") ) {
 			PASSED.writeln("Campaign is active");
 		} else {
 			FAILED.writeln("Campaign is not active. Expected – active");
+			flow.makeErrorScreenshot();
 //			throw new TestFailedException();
 		}
 		
@@ -381,44 +404,143 @@ public class User extends Test {
 			PASSED.writeln("Page with element 'page-explore-invest' has been reached");
 		} catch (TimeoutException e) {
 			FAILED.writeln("Page with element 'page-explore-invest' has not been reached");
+			flow.makeErrorScreenshot();
 //			throw new TestFailedException();
 		}
 				
 		slider.set(100); // Buy all corites
 		
-		boolean userHaveCard = accentBtn.exists(); // User have creditcard
-		
-		DEBUG.writeln("User have credit card: " + userHaveCard);
-		if ( userHaveCard ) 
-			accentBtn.click();
-		else
-			nextBtn.click();
-		
 		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
+			Thread.sleep(100);
+		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
 		
-		driver.switchTo().frame(0);
+		boolean userHaveCard = accentBtn.exists(); // User have creditcard
 		
-		cardNumber.set("4242424242424242");
-		expDate.set("424");
-		cvc.set("242");
-		zip.set("42424");
+		flow.makeScreenshot("A");
 		
-		driver.switchTo().defaultContent();
-		
+//		DEBUG.writeln("User have credit card: " + userHaveCard);
 		if ( userHaveCard ) 
-			nextBtn.click();
-		else
 			accentBtn.click();
+		else
+			nextBtn.click();
+		
+		if ( iframe.exists() ) {
+		
+			driver.switchTo().frame(iframe.getEl());
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			cardNumber.set("4242424242424242");
+			expDate.set("424");
+			cvc.set("242");
+			zip.set("42424");
+			
+			driver.switchTo().defaultContent();
+			
+			if ( userHaveCard ) {
+				nextBtn.click(); // Get corites
+				
+				if ( thankyou.exists() ) {
+				
+					driver.get(getBaseUrl() + "/explore/" + campaignId);
+					
+					// Check if the campaign is funded
+					if ( campaignStatus.exists() && campaignStatus.getText().equals("FUNDED") ) {
+						PASSED.writeln("Campaign is funded. Campaign Id: " + campaignId);
+					} else {
+						FAILED.writeln("Campaign is '" + campaignStatus.getText() + "'. Expected – funded. Campaign Id: " + campaignId);
+						flow.makeErrorScreenshot();
+			//			throw new TestFailedException();
+					}
+				} else {
+					FAILED.writeln("Thankyou invest page was not reached. See screenshot: 'Error_buyCorites_1'");
+					flow.makeErrorScreenshot();
+				}
+			} else
+				accentBtn.click(); // Cancel getting corites
+			
+		} else {
+			FAILED.writeln("iframe for credit card information is not exist. See screenshot: 'Error_buyCorites_2'");			
+			flow.makeScreenshot("Error_buyCorites_2_");
+		}
 	}
 	
     public void teardown () {
     	driver.get(getBaseUrl() + "/logout");
     	driver.quit();
     }
+
+	public void fillReleaseInfo(String campaignId) {
+		
+ 		TextInput songName = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("songName")));
+		TextInput cover = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("cover")));
+ 		TextInput label = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("label")));
+	    TextInput company = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("company")));
+	    TextInput isrc = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("isrc")));
+	    TextInput artists = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("artists")));
+	    TextInput producers = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("producers")));
+	    TextInput composers = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("composers")));
+	    TextInput mixers = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("mixers")));
+	    TextInput publishers = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("publishers")));
+	    TextInput countries = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("countries")));
+	    Element country = new Element(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("country")));
+	    TextInput date = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("date")));
+	    Element releaseBtn = new Element(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("releaseBtn")));
+
+		ACTION.writeln("Filling in release information. Campaign Id: " + campaignId);
+		flow.setDriver(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+
+		driver.get(this.getBaseUrl() + "/my-campaigns/" + campaignId + "/release");
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-campaign-own-release")));
+		
+		songName.set("The day before you came");
+		cover.set(new File (Accesses.getPathto().get("files") + "ABBA_-_Super_Trouper_(Polar).jpg").getAbsolutePath());
+		
+		label.set("Polar, Polydor, Atlantic, Epic, RCA Victor, Vogue, Sunshine");
+		company.set("Polar Music Studio");
+		Random random =  new Random();
+		Integer isrcNum = random.nextInt(1000000 - 100000) + 100000;
+		String isrcStr = isrcNum.toString();
+		isrc.set(isrcStr);
+		artists.set("Agnetha Fältskog, Björn Ulvaeus, Benny Andersson, Anni-Frid Lyngstad");
+		producers.set("Stig Anderson");
+		composers.set("Benny Andersson");
+		mixers.set("Benny Andersson");
+		publishers.set("Sony BMG Music Entertainment");
+		countries.click();
+		country.click();
+		releaseBtn.click();
+				
+//		((JavascriptExecutor)driver).executeScript("scroll(0,400)");
+	
+	}
+
+	public void checkDeclineEmail() {
+		flow.setDriver(driver);
+		try {
+			driver.get( getToken(
+				Accesses.getLogins().get("noreply"),	// from
+				this.getUserEmail(),								// to
+				Configuration.getCsss().get("confirmlinks").get("declined") // confirm link in the letter
+			));
+
+			flow.checkHtmlHash();
+			
+		} catch (TestFailedException | InterruptedException e) {
+			FAILED.writeln("Problem with receiving an email with campaign declining message. User email: " + this.getUserEmail() );
+			throw new TestFailedException();				
+		}
+		
+		
+	}
 
 }

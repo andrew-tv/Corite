@@ -21,6 +21,7 @@ import agency.july.flow.Flow;
 import agency.july.flow.Test;
 import agency.july.flow.TestFailedException;
 import agency.july.flow.User;
+import agency.july.flow.CompaignStatus;
 import agency.july.logger.TestingLogger;
 
 public class App {
@@ -50,6 +51,7 @@ public class App {
 				Thread threadLoginLogout = null;
 				Thread threadRegisterWithEmail = null;
 				Thread threadStartcampaign = null;
+				Thread threadReleaseinformation = null;
 				
 				// Основное цикл по тестам
 				List <String> runningTests = Configuration.getRuntests();
@@ -64,15 +66,12 @@ public class App {
 							public void run() {
 								
 								Flow flow = new Flow( "loginlogout" );
-
 								User user = new User( flow ).withUser( "test" );
 								
 								try {			
 									
 						            user.login(); 
-						            PASSED.writeln("Login an user");
 						            user.logout(); 
-						            PASSED.writeln("Logout an user");
 						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
@@ -100,9 +99,9 @@ public class App {
 					            Admin admin = new Admin( flow ).withUser( "root" );
 								try {
 									newuser.register();
-//									admin.login();
-//								    admin.gotoAdminPage();
-//								    admin.removeUser( user.getUserFullName() );
+									admin.login();
+								    admin.gotoAdminPage();
+								    admin.removeUser( newuser.getUserFullName() );
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
 									FAILED.writeln("Registration with email '" + newuser.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
@@ -130,7 +129,7 @@ public class App {
 
 					            Test nonameUser = new User( flow );
 								User user = new User( flow ).withUser( "test" );
-					            User newuser = new User( flow ).withUser( "newuser" );
+					            User newuser = new User( flow ).withUser( "newuser_startcampaign" );
 					            Admin root = new Admin( flow ).withUser( "root" ); // Supper admin
 					            Admin admin = new Admin( flow ).withUser( "admin" );
 								
@@ -155,15 +154,15 @@ public class App {
 
 						            user.buyCorites (campaignId);
 						            
+//						            user.fillReleaseInfo(campaignId);
+
 						            root.login();
 									root.gotoAdminPage();
-									
 						            root.removeUser( newuser.getUserFullName() );
-
-									root.removeCampaignOrders( campaignId );
-						            
-									root.removeCampaign(Configuration.getPatterns().get(1));
-						            
+//*						            
+//									root.removeCampaignOrders( campaignId );
+//									root.removeCampaign(Configuration.getPatterns().get(1));
+//*/						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
 									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
@@ -184,6 +183,54 @@ public class App {
 							threadStartcampaign.setName("StartCampaign");
 							threadStartcampaign.start();
 						break;
+						
+						case "releaseinformation" : 
+							threadReleaseinformation = new Thread (new Runnable() {
+								public void run() {
+									
+									Flow flow = new Flow( "releaseinformation" );
+									User user = new User( flow ).withUser( "test" );
+									Admin admin = new Admin( flow ).withUser( "admin" );
+									
+									try {			
+										
+							            // Prepare initial state
+										admin.login(); 
+							            admin.moderateCampaign("295", CompaignStatus.NONE);
+
+							            // Begin test
+							            user.login(); 
+							            user.fillReleaseInfo("295");
+							            
+							            if ( admin.getCompaignStatus("295") == CompaignStatus.NEEDS_MODERATION ) 
+							            	PASSED.writeln("Release information of campaign #295 was filled in by '" + user.getUserEmail() + "'");
+							            else
+							            	throw new TestFailedException();
+							            
+							            // Restore initial state
+							            admin.moderateCampaign("295", CompaignStatus.DECLINE);
+							            
+							            user.checkDeclineEmail();
+							            
+//							            user.logout(); 
+							            
+									} catch (TestFailedException e) {
+										flow.makeScreenshot();
+										FAILED.writeln("Filling in a release information of campaign #295 by '" + user.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+									} catch (Exception e) {
+										flow.makeScreenshot();
+										FAILED.writeln("Filling in a release information '" + user.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+										e.printStackTrace();
+									} finally {
+							            INFO.writeln("Filling in a release information test finished");
+							            user.teardown();
+							            admin.teardown();
+									}
+								}
+							});
+							threadReleaseinformation.setName("ReleaseInformation");
+							threadReleaseinformation.start();
+							break;
 
 					}
 				}
@@ -192,6 +239,7 @@ public class App {
 				if (threadLoginLogout != null) threadLoginLogout.join();
 				if (threadRegisterWithEmail != null) threadRegisterWithEmail.join();
 				if (threadStartcampaign != null) threadStartcampaign.join();
+				if (threadReleaseinformation != null) threadReleaseinformation.join();
 
 			} catch (FileNotFoundException e1) {
 				System.out.println("Could not load configuration file: ./params.yml");

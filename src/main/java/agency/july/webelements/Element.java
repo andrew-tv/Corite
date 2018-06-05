@@ -63,7 +63,7 @@ public class Element {
 	public String getText () {
 		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 		refresh();
-		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
+//		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 		return this.el.getText();
 	}
 	
@@ -77,7 +77,7 @@ public class Element {
 		wait.until( ExpectedConditions.elementToBeClickable(by) );
 		this.el.click();
 		
-		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
+//		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 	}
 /*
 	public boolean checkAttr(String attr, String value) {

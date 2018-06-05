@@ -27,7 +27,7 @@ public class Selection extends Element {
 		Select sel = new Select(el);
 		sel.selectByValue(value);
 		
-		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
+//		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 	}
 
 }

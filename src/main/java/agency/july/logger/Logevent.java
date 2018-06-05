@@ -40,9 +40,9 @@ public enum Logevent {
 	
 	public static String getCodePoint() { // Возвращает точку кода в котором произошел вызов метода writeln()
 	    StackTraceElement ste = Thread.currentThread().getStackTrace()[3]; // 3 - уровень отката по стеку вызовов функций
-	    if ( ste.getClassName().equals("agency.july.logger.Assert") ) {
-	    	ste = Thread.currentThread().getStackTrace()[5];
-	    }
+//	    if ( ste.getClassName().equals("agency.july.logger.Assert") ) {
+//	    	ste = Thread.currentThread().getStackTrace()[5];
+//	    }
 	    return //ste.getFileName() + ":" + 
 	           ste.getClassName() + ":" + 
 	           ste.getMethodName() + "():" +  

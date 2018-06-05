@@ -13,6 +13,7 @@ csss:
        registration: "a.confirm-registration"
        moderation: "a.inform-campaign-to-moderate"
        accepted: "a.inform-creator-about-accept"
+       declined: "a[data-e2e=informCreatorAboutDecline]"
     loginpage:
        email: "[name=email]"
        password: "[name=password]"
@@ -25,7 +26,8 @@ csss:
        passwordConfirmIn: "input[name=new-password-confirm]"
        telephoneIn: "input[name=phone]"
        registerSubmit: "button.mat-flat-button"
-       registerConfirmationTxt: "page-account-register > main > account-register > div > p > strong" # email of a jast registered user 
+       registerConfirmationTxt: "page-account-register > main > account-register > div > p > strong" # email of a jast registered user
+       matError: "mat-error"
     thankyoupage:
        txtContent: "app-root"
     explorepage:
@@ -60,6 +62,7 @@ csss:
        buyCoritesBtn: "a[routerlink=invest]"
        accentBtn: ".mat-flat-button.mat-accent"
        pledgeBtn: ".mat-flat-button.mat-primary"
+       thankyou: "campaign-invest-thankyou"
     adminpage:
        searchQuery: "input[name=query]" 
        searchBtn: "button[type=submit].btn"
@@ -68,20 +71,46 @@ csss:
        confirmDeleteUserBtn: "#modal-delete-button"
        searshResultsNumber: "h1.title > strong"
        detectedItem: "tr[data-id]"
+    releaseinfopage:
+       songName: "input[name='campaign[release][songName]']"
+       cover: "app-file-upload div.item input"
+       label: "input[name='campaign[release][label]']"
+       company: "input[name='campaign[release][company]']"
+       isrc: "input[name='campaign[release][ISRC]']"
+       artists: "input[name='campaign[release][contribArtists]']"       
+       producers: "input[name='campaign[release][contribProducers]']"
+       composers: "input[name='campaign[release][contribComposers]']"
+       mixers: "input[name='campaign[release][contribMixers]']"
+       publishers: "input[name='campaign[release][contribPublishers]']"
+       countries: "div.mat-select-value"
+       country: "#mat-option-83"
+       date: "input[name='campaign[releaseDate]']"
+       releaseBtn: ".mat-flat-button.mat-primary"
 
 flowsss:
     loginlogout:
 
     registerwithemail:
+    
+    releaseinformation:
+#0 Page after cliking on link in campaign declining email message. Campaign Id: 295
+      - csss: "page-my-campaigns"
+        hash: "213662370" # 1912271344
         
     startcampaign:
-#0
-      - csss: "campaign-explore-teaser" # css selector to check hash of its innerhtml
-        hash: "1327027928" # hashcode of the element's innerHTML
+#0 
+      - csss: "explore-teaser" # css selector to check hash of its innerhtml
+        hash: "-14973616" # hashcode of the element's innerHTML
+#1
+      - csss: "page-explore-view"
+        hash: "1"
+#2
+      - csss: "page-explore-view"
+        hash: "2"
     
 patterns:
 #  id: pattern
-     1: The day before you came
+     1: Eagle
 
 logger:
     debug: true
@@ -92,6 +121,7 @@ logger:
     failed: true
 
 runtests: 
-   - loginlogout
-   - registerwithemail
+#   - loginlogout
+#   - registerwithemail
    - startcampaign
+#   - releaseinformation

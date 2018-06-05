@@ -7,7 +7,7 @@ public interface IFlow {
 	public WebDriver getDriver();
 	public void setDriver(WebDriver driver);
 	public int getScreenshotHash();
-	public void incSlideNumber();
+//	public void incSlideNumber();
 	public int getCurrentSlideNumber();
 //	public void waitForHtmlHash();
 	public void waitForHtmlHash(By by);

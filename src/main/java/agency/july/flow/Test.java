@@ -12,21 +12,19 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import agency.july.config.models.Accesses;
-import agency.july.config.models.Configuration; // agency.july.test.config.models.Configuration;
-import agency.july.config.models.DriverType; // agency.july.test.config.models.DriverType;
+import agency.july.config.models.Configuration;
+import agency.july.config.models.DriverType;
 import agency.july.webelements.Element;
 
 public abstract class Test {
 	
     protected WebDriver driver;
     protected Flow flow;
-	
-//	public Test() { }
+    protected int defaultImplicitly = 10;
 	
 	public Test ( Flow flow ) {
     	setDriver( Configuration.getBrowser() );
@@ -68,8 +66,7 @@ public abstract class Test {
 		
 	    default:
 	    	this.driver = null;
-	    }
-	
+	    }	
 	}
     
     public void goHome() { 
@@ -79,6 +76,28 @@ public abstract class Test {
 	public String getBaseUrl() {
 		return Accesses.getUrls().get("base");
 	}
+	
+	public void checkFormFillingError() {
+		
+    	this.driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+
+		Element matError = new Element(this.flow, By.cssSelector("mat-error"));
+		if ( matError.exists() ) {
+			String errorText = matError.getText();
+			FAILED.writeln("Form filling error: '" + errorText + "'" );
+			if ( !errorText.contains("email") ) {
+				throw new TestFailedException();					
+			}
+		}
+		
+		matError = new Element(this.flow, By.cssSelector(".mat-error"));
+		if ( matError.exists() ) {
+			FAILED.writeln("Form filling error: '" + matError.getText() + "'" );
+			throw new TestFailedException();					
+		}
+		
+    	this.driver.manage().timeouts().implicitlyWait(this.defaultImplicitly, TimeUnit.SECONDS);
+	}	
     
     public void checkFirstCampaignInList() {
 
@@ -87,15 +106,14 @@ public abstract class Test {
     	flow.setDriver(driver);
     	goHome();
 		wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-list")) );
-		wait.until( ExpectedConditions.textToBe(By.cssSelector("div.audio > div > div.slider__max"), "00:27") );
+//		wait.until( ExpectedConditions.textToBe(By.cssSelector("div.audio > div > div.slider__max"), "00:27") );
 
-    	if ( flow.checkHtmlHash() ) PASSED.writeln("The first campaign in the list is checked after moderation");
+    	if ( flow.checkHtmlHash() ) 
+    		PASSED.writeln("The first campaign in the list is checked after moderation");
     	else {
-			FAILED.writeln("The first campaign in the list or its hash is wrong after moderation. Slide: " 
-					+ flow.getCurrentSlideNumber() );
-			flow.makeScreenshot();
+			FAILED.writeln("The first campaign in the list or its hash is wrong after moderation");
+			flow.makeErrorScreenshot();
     	}
-    	
     }
     
     public void teardown () {

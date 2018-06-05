@@ -24,6 +24,7 @@ public class Flow implements IFlow {
 	private String pathToScreenshots;
 	private List< Map < String, String > > flowMap;
 	private int currentSlideNumber = 0;
+	private int currentError = 0;
 	
 	private int dutycycle = 500;
 	private int repetitions = 16;
@@ -42,14 +43,10 @@ public class Flow implements IFlow {
 		return currentSlideNumber;
 	}
 /*
-	public int nextHashBefore() {
-		return Integer.parseInt( flowMap.get(currentSlide).get("hash") );
-	}
-*/	
 	public void incSlideNumber() {
 		currentSlideNumber++;
 	}
-	
+*/	
 	public String getPathToScreenshots() {
 		return pathToScreenshots;
 	}
@@ -72,7 +69,7 @@ public class Flow implements IFlow {
 		try {
 			FileUtils.copyFile(screenshot, new File(this.pathToScreenshots
 					+ flowName + "/"
-					+ "id_" + this.currentSlideNumber 
+					+ "slide_" + this.currentSlideNumber 
 					+ "_hash_" + java.util.Arrays.hashCode(bytes) 
 					+ "_" + screenshot.getName().substring(15) 
 					));
@@ -82,6 +79,45 @@ public class Flow implements IFlow {
 			e.printStackTrace();
 		}
 	}
+
+	public void makeScreenshot(String prefix) {
+		byte[] bytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+		File screenshot = OutputType.FILE.convertFromPngBytes(bytes);
+		
+		try {
+			FileUtils.copyFile(screenshot, new File(this.pathToScreenshots
+					+ flowName + "/"
+					+ prefix
+					+ "_slide_" + this.currentSlideNumber 
+					+ "_" + screenshot.getName().substring(15) 
+					));
+		} catch (IOException e) {
+			System.err.println("Impossible to store a screenshot");	
+			e.printStackTrace();
+		}
+	}
+	
+	public void makeErrorScreenshot() { 
+	    StackTraceElement ste = Thread.currentThread().getStackTrace()[2]; // 2 - уровень отката по стеку вызовов функций
+		byte[] bytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+		File screenshot = OutputType.FILE.convertFromPngBytes(bytes);
+
+		try {
+			FileUtils.copyFile(screenshot, new File(this.pathToScreenshots
+					+ flowName + "/"
+					+ "err_" + this.currentError + "_"
+			        + ste.getClassName() + "_"
+			        + ste.getMethodName() + "_" 
+			        + ste.getLineNumber() + "_" 
+					+ screenshot.getName().substring(15) 
+					));
+			this.currentError++;
+		} catch (IOException e) {
+			System.err.println("Impossible to store a screenshot");	
+			e.printStackTrace();
+		}
+	}	
+
 
 	@Override
 	public int getScreenshotHash() {
@@ -103,7 +139,11 @@ public class Flow implements IFlow {
 		int hash = this.driver.findElement(By.cssSelector(getCurrentCssSelector()))
 		.getAttribute("innerHTML").replaceAll("\\d+|src=.+?\\\"", "").hashCode();
 		int expectedHash = getExpectedHtmlHash();
-		currentSlideNumber++;
+		if (hash != expectedHash) {
+			WARNING.writeln("Slide number: " + this.currentSlideNumber + ". Expected hash: " + expectedHash + ". Real hash: " + hash);
+			makeScreenshot();
+		}
+		this.currentSlideNumber++;
 		return hash == expectedHash;
 	}
 

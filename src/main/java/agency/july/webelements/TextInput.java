@@ -3,7 +3,6 @@ package agency.july.webelements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
-import agency.july.flow.Flow;
 import agency.july.flow.IFlow;
 
 public class TextInput extends Element {
@@ -25,7 +24,7 @@ public class TextInput extends Element {
 		el.clear();
 		el.sendKeys(value); // Ввели текст
 		
-		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
+//		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 	}
 
 	public void set(Keys key) {

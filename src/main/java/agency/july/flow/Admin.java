@@ -21,8 +21,8 @@ import agency.july.webelements.TextInput;
 public class Admin extends User {
 	
 	private final String baseurl = Accesses.getUrls().get("adminbase");
-	private final String allUsers = baseurl + "/?entity=User&action=list&menuIndex=9&submenuIndex=-1";
-	private final String allCampaigns = baseurl + "/?entity=Campaign&action=list&menuIndex=1&submenuIndex=-1";
+	private final String allUsers = baseurl + "/?entity=User&action=list&menuIndex=10&submenuIndex=-1";
+	private final String allCampaigns = baseurl + "/?entity=Campaign&action=list&menuIndex=2&submenuIndex=-1";
 	private final String editUser43 = baseurl + "/?entity=User&action=edit&id=43";
 
 	// Explore page
@@ -118,14 +118,16 @@ public class Admin extends User {
 		
 		try {
 			profileBtn.click();
+			Thread.sleep(100); // wait for ending animation
 			menuAdmin.click();
 			// Change window
-			for(String winHandle : driver.getWindowHandles()){
+			for( String winHandle : driver.getWindowHandles() ) {
 			    driver.switchTo().window(winHandle);
 			}
 			
 	        driver.manage().window().setSize(new Dimension(1300, 800));
-			wait.until(ExpectedConditions.titleContains("All campaigns"));
+//	        driver.get( this.getBaseUrl() );
+			wait.until(ExpectedConditions.titleContains("Dashboard"));
 			
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
@@ -250,6 +252,61 @@ public class Admin extends User {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	public CompaignStatus getCompaignStatus(String campaignId) {
+		flow.setDriver(driver);
+		driver.get( this.getBaseUrl() + "/?entity=Campaign&action=edit&id=" + campaignId );
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		wait.until(ExpectedConditions.titleContains("Moderate Campaign (#" + campaignId + ")"));
+		
+		List <WebElement> checkboxes = driver.findElements(By.cssSelector("input[name='campaign[moderationStatus]']"));
+		for (WebElement el : checkboxes) {
+			if (el.getAttribute("checked") != null ) {
+				switch ( el.getAttribute("value") ) {
+					case "0" : return CompaignStatus.NONE;
+					case "2" : return CompaignStatus.NEEDS_MODERATION;
+					case "1" : return CompaignStatus.ACCEPT;
+					case "-1" : return CompaignStatus.DECLINE;					
+				}
+			}
+		}
+		return null;
+	}
+
+	public void moderateCampaign(String campaignId, CompaignStatus status) {
+		flow.setDriver(driver);
+		driver.get( this.getBaseUrl() + "/?entity=Campaign&action=edit&id=" + campaignId );
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		wait.until(ExpectedConditions.titleContains("Moderate Campaign (#" + campaignId + ")"));
+
+		WebElement checkboxModerator = null;
+		
+		switch (status) {
+		case NONE :
+			checkboxModerator = driver.findElement(By.cssSelector("input[name='campaign[moderationStatus]'][value='0']"));
+			break;
+		case NEEDS_MODERATION :
+			checkboxModerator = driver.findElement(By.cssSelector("input[name='campaign[moderationStatus]'][value='2']"));
+			break;
+		case ACCEPT :
+			checkboxModerator = driver.findElement(By.cssSelector("input[name='campaign[moderationStatus]'][value='1']"));
+			break;
+		case DECLINE :
+			checkboxModerator = driver.findElement(By.cssSelector("input[name='campaign[moderationStatus]'][value='-1']"));
+			break;
+		}
+		if ( checkboxModerator.getAttribute("checked") == null ) {
+			checkboxModerator.click();
+			try { // Без этой задержки работает нестабильно при DECLINE. Видимо из-за прорисовки окна для ввода сообщения
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+			driver.findElement(By.cssSelector("button.action-save")).click();		
+		}
+
 	}
 
 }
