@@ -69,15 +69,19 @@ public abstract class Test {
 	    }	
 	}
     
-    public void goHome() { 
-    	driver.get(Accesses.getUrls().get("base"));
-    }
-    
 	public String getBaseUrl() {
 		return Accesses.getUrls().get("base");
 	}
 	
-	public void checkFormFillingError() {
+    public void goHome() { 
+    	driver.get(Accesses.getUrls().get("base"));
+    }
+    
+	public void gotoExplorePage() {
+		driver.get( getBaseUrl() + "/explore" );
+	}
+	    
+	public void checkFormFillingError(boolean throwExeption) {
 		
     	this.driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
 
@@ -85,28 +89,25 @@ public abstract class Test {
 		if ( matError.exists() ) {
 			String errorText = matError.getText();
 			FAILED.writeln("Form filling error: '" + errorText + "'" );
-			if ( !errorText.contains("email") ) {
-				throw new TestFailedException();					
-			}
+			if ( throwExeption ) throw new TestFailedException();
 		}
 		
 		matError = new Element(this.flow, By.cssSelector(".mat-error"));
 		if ( matError.exists() ) {
 			FAILED.writeln("Form filling error: '" + matError.getText() + "'" );
-			throw new TestFailedException();					
+			if ( throwExeption ) throw new TestFailedException();
 		}
 		
     	this.driver.manage().timeouts().implicitlyWait(this.defaultImplicitly, TimeUnit.SECONDS);
-	}	
+	}
     
     public void checkFirstCampaignInList() {
 
 		WebDriverWait wait = new WebDriverWait(driver, 10);
     	
     	flow.setDriver(driver);
-    	goHome();
+    	gotoExplorePage();
 		wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-list")) );
-//		wait.until( ExpectedConditions.textToBe(By.cssSelector("div.audio > div > div.slider__max"), "00:27") );
 
     	if ( flow.checkHtmlHash() ) 
     		PASSED.writeln("The first campaign in the list is checked after moderation");

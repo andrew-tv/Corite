@@ -14,13 +14,27 @@ csss:
        moderation: "a.inform-campaign-to-moderate"
        accepted: "a.inform-creator-about-accept"
        declined: "a[data-e2e=informCreatorAboutDecline]"
+       informCreatorAboutFunded: "a[data-e2e=informCreatorAboutFunded]"
+       informBackerAboutFunded: "a[data-e2e=informBackerAboutFunded]"
     commonelements:
        matError: "mat-error"
        submitBtn: "form .mat-flat-button.mat-primary"
+       accentBtn: "form .mat-flat-button.mat-accent"
     loginpage:
        email: "[name=email]"
        password: "[name=password]"
-       #submit: "form .mat-flat-button.mat-primary"
+       
+       googleBtn: "button.google.mat-flat-button.mat-primary"
+       googleEmailIn: "input[name=identifier]"
+       googlePasswordIn: "input[name=password]"
+       googleIdentifierNextBtn: "#identifierNext"
+       googlePasswordNextBtn: "#passwordNext"
+       
+       facebookBtn: "button.facebook.mat-flat-button.mat-primary"
+       facebookEmailIn: "#email"
+       facebookPasswordIn: "#pass"
+       facebookLoginBtn: "#loginbutton"
+       
     registerpage:
        yourEmailIn: "input[name=email]"
        firstNameIn: "input[name=fname]"
@@ -28,13 +42,12 @@ csss:
        passwordNewIn: "input[name=new-password]"
        passwordConfirmIn: "input[name=new-password-confirm]"
        telephoneIn: "input[name=phone]"
-       #registerSubmit: "button.mat-flat-button"
        registerConfirmationTxt: "page-account-register > main > account-register > div > p > strong" # email of a jast registered user
     thankyoupage:
        txtContent: "app-root"
     explorepage:
        loginBtn: "a[routerlink='/user/login']"
-       userName: "a[routerlink='/profile']"
+       userNameTxt: "a[routerlink='/profile']"
        profileBtn: ".button.mat-icon-button"
        menuAdmin: "a.mat-list-link[href='https://admin.dev.corite.com/']"
        menuMyCampaign: "a.mat-list-link[href='/my-campaigns']"
@@ -62,7 +75,7 @@ csss:
        slider: "mat-slider"
        #nextBtn: ".mat-flat-button.mat-primary"
        buyCoritesBtn: "a[routerlink=invest]"
-       accentBtn: ".mat-flat-button.mat-accent"
+       #accentBtn: ".mat-flat-button.mat-accent"
        #pledgeBtn: ".mat-flat-button.mat-primary"
        thankyou: "campaign-invest-thankyou"
     adminpage:
@@ -86,8 +99,8 @@ csss:
        publishers: "input[name='campaign[release][contribPublishers]']"
        countries: "div.mat-select-value"
        country: "#mat-option-83"
-       date: "input[name='campaign[releaseDate]']"
-       releaseBtn: ".mat-flat-button.mat-primary"
+       date: "input[min]"
+       #releaseBtn: ".mat-flat-button.mat-primary"
 
 flowsss:
     loginlogout:
@@ -96,9 +109,13 @@ flowsss:
     
     releaseinformation:
 #0 Page after cliking on link in campaign declining email message. Campaign Id: 295
-      - csss: "page-my-campaigns"
-        hash: "213662370" # 1912271344
+#      - csss: "page-campaign-own-edit"
+#        hash: "-181239646" #"593831657"
         
+    releasecampaign:
+      - csss: "page-campaign-own-edit"
+        hash: "-181239646"
+    
     startcampaign:
 #0 
       - csss: "explore-teaser" # css selector to check hash of its innerhtml
@@ -129,4 +146,5 @@ runtests:
 #   - registerwithemail
 #   - startcampaign
 #   - releaseinformation
-    - incorrectcard
+   - releasecampaign
+#    - incorrectcard

@@ -25,7 +25,7 @@ import agency.july.config.models.EmailParams; // agency.july.test.config.models.
 public class ImapClient  {
 	
 	private Session session;
-	private Message message[];
+	private Message messages[];
 	private Store store;
 	private IMAPFolder folder;
 	
@@ -47,7 +47,7 @@ public class ImapClient  {
 
         Flags seen = new Flags(Flags.Flag.SEEN);
         FlagTerm unseenFlagTerm = new FlagTerm( seen, false);
-        message = folder.search(unseenFlagTerm);
+        messages = folder.search(unseenFlagTerm);
 
         } catch (MessagingException e) {
             System.out.println("Error: ImapClient() >> " + e);
@@ -74,7 +74,7 @@ public class ImapClient  {
 
         Flags seen = new Flags(Flags.Flag.SEEN);
         FlagTerm unseenFlagTerm = new FlagTerm( seen, false);
-        message = folder.search(unseenFlagTerm);
+        messages = folder.search(unseenFlagTerm);
 
         } catch (MessagingException e) {
             System.out.println("Error: ImapClient() >> " + e);
@@ -82,14 +82,14 @@ public class ImapClient  {
     }
     
     public void readMsgs() {
-        System.out.println(message.length);
+        System.out.println(messages.length);
 	   	try {
-	        for (int i = 0; i < message.length; i++) {
+	        for (int i = 0; i < messages.length; i++) {
 	            System.out.println("Message " + (i));
-	            System.out.println("From : " + message[i].getFrom()[0].toString());
-	            System.out.println("Subject : " + message[i].getSubject());
+	            System.out.println("From : " + messages[i].getFrom()[0].toString());
+	            System.out.println("Subject : " + messages[i].getSubject());
 	            try {
-	                System.out.println("Body: " + message[i].getContent().toString());
+	                System.out.println("Body: " + messages[i].getContent().toString());
 	            } catch (IOException ex) {
 	                System.out.println(ex);
 	            }
@@ -99,6 +99,16 @@ public class ImapClient  {
 	    }
     }
     
+    public void markAsSeen(String from) {
+	   	try {
+	        for (int i = 0; i < messages.length; i++) {
+	        	messages[i].setFlag(Flag.SEEN, true);
+	        }    
+	    } catch (MessagingException e) {
+	        e.printStackTrace();
+	    }
+    }
+
     private String getTextFromMessage(Message message) throws MessagingException, IOException {
 //    	System.out.println("ContentType : " + message.getContentType());
         String result = "";
@@ -174,14 +184,14 @@ public class ImapClient  {
     // Перебирает все непросмотренные письма, выбирает первое, которое пришло от from и возвращает true, если в нем есть текст subсontent
     public boolean сontentContains (String from, String to, String subсontent) /*throws Exception*/ {
 	   	try {
-	        for (int i = 0; i < message.length; i++) {
-	        	String content = getTextFromMessage(message[i]);
-	        	if ( message[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && message[i].getFrom()[0].toString().contains(from) ) { // Сообщение пришло от from
-	        		message[i].setFlag(Flag.SEEN, true); 
+	        for (int i = 0; i < messages.length; i++) {
+	        	String content = getTextFromMessage(messages[i]);
+	        	if ( messages[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && messages[i].getFrom()[0].toString().contains(from) ) { // Сообщение пришло от from
+	        		messages[i].setFlag(Flag.SEEN, true); 
 //	        		message[i].setFlag(Flag.DELETED, true); 
 	        		return content.contains(subсontent); // Есть ли искомый текст
 	        	} else { // Восстанавливаем для всех "не наших" писем флаг "не просмотрено" (чтобы не нарушать состояние почты из-за автоматического перебора писем)
-	        		message[i].setFlag(Flag.SEEN, false); 
+	        		messages[i].setFlag(Flag.SEEN, false); 
 	        	}
 	        }    
 	    } catch (MessagingException e) {
@@ -196,19 +206,19 @@ public class ImapClient  {
     public String getURLfromContent (String from, String to, String prefix) /*throws Exception*/ {
 //    	String result = "";
 	   	try {
-	        for (int i = 0; i < message.length; i++) {
+	        for (int i = 0; i < messages.length; i++) {
 //	        	String content = message[i].getContent().toString(); // Все содержимое если только текст (не Multipart)
-	        	String content = getTextFromMessage(message[i]);
+	        	String content = getTextFromMessage(messages[i]);
     	        System.out.println("content: readMsgs() >> " + content);
-    	        System.out.println("from: readMsgs() >> " + message[i].getFrom()[0].toString());
-	        	if (message[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && message[i].getFrom()[0].toString().contains(from) && content.contains(prefix)) { // Сообщение удовлетворяет заданным параметрам
-	        		message[i].setFlag(Flag.SEEN, true); 
+    	        System.out.println("from: readMsgs() >> " + messages[i].getFrom()[0].toString());
+	        	if (messages[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && messages[i].getFrom()[0].toString().contains(from) && content.contains(prefix)) { // Сообщение удовлетворяет заданным параметрам
+	        		messages[i].setFlag(Flag.SEEN, true); 
 //	        		message[i].setFlag(Flag.DELETED, true);
 	        		String result = Pattern.compile(".+(" + prefix + ".{43}).+", Pattern.DOTALL).matcher(content).replaceFirst("$1"); // Выдергиваем ссылку
 	    	        System.out.println("URL: readMsgs() >> " + result);
 	        		return result; 
 	        	} else { // Восстанавливаем для всех "не наших" писем флаг "не просмотрено" (чтобы не нарушать состояние почты из-за автоматического перебора писем)
-	        		message[i].setFlag(Flag.SEEN, false); 
+	        		messages[i].setFlag(Flag.SEEN, false); 
 	        	}
 	        }    
 	    } catch (MessagingException e) {
@@ -222,18 +232,18 @@ public class ImapClient  {
     // Перебирает все непросмотренные письма и выбирает первое, которое пришло от from и было направлено to и по selector возвращает ссылку
     public String getHref (String from, String to, String selector) {
 	   	try {
-	        for (int i = 0; i < message.length; i++) {
+	        for (int i = 0; i < messages.length; i++) {
 //    	        System.out.println( "from: readMsgs() >> " + message[i].getFrom()[0].toString() );
 //    	        System.out.println( "to: readMsgs() >> " + message[i].getRecipients(Message.RecipientType.TO)[0].toString() );
    	     // Сообщение удовлетворяет заданным параметрам, то есть пришло от from и было направлено to
-	        	if (message[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && message[i].getFrom()[0].toString().contains(from)) { 
+	        	if (messages[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && messages[i].getFrom()[0].toString().contains(from)) { 
 //		        	String html = getHTMLFromCoriteMessage(message[i]);
 //		        	Document doc = Jsoup.parse(html);
 //	    	        System.out.println("before getHTMLFromCoriteMessage >> ");
-		        	Element link = Jsoup.parse( getHTMLFromCoriteMessage(message[i]) ).select(selector).first();
+		        	Element link = Jsoup.parse( getHTMLFromCoriteMessage(messages[i]) ).select(selector).first();
 		        	if (link != null) {
 		        		String linkHref = link.attr("href");
-		        		message[i].setFlag(Flag.SEEN, true); 
+		        		messages[i].setFlag(Flag.SEEN, true); 
 	//	        		message[i].setFlag(Flag.DELETED, true);
 //		    	        System.out.println("linkHref >> " + linkHref);
 		        		
@@ -241,7 +251,7 @@ public class ImapClient  {
 		        	}
 	        	}
 	        	// Восстанавливаем для всех "не наших" писем флаг "не просмотрено" (чтобы не нарушать состояние почты из-за автоматического перебора писем)
-	        	message[i].setFlag(Flag.SEEN, false); 
+	        	messages[i].setFlag(Flag.SEEN, false); 
 	        }    
 	    } catch (MessagingException e) {
 	        System.err.println("Error: readMsgs() >> " + e);

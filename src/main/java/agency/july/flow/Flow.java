@@ -42,6 +42,14 @@ public class Flow implements IFlow {
 	public int getCurrentSlideNumber() {
 		return currentSlideNumber;
 	}
+	
+	public void sleep(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}		
+	}
 /*
 	public void incSlideNumber() {
 		currentSlideNumber++;

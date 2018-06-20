@@ -19,7 +19,8 @@ public class Main {
 
 //    	System.out.println(client.getURLfromContent("no-reply@dev.corite.com", "autotest-corite-newuser@july.agency", "https://mandrillapp.com/track/click" ));
     	
-    	client.getHref("no-reply@dev.corite.com", "autotest-corite-newuser@july.agency", "a.confirm_registration_link");
+//    	client.getHref("no-reply@dev.corite.com", "autotest-corite-newuser@july.agency", "a.confirm_registration_link");
+    	client.markAsSeen("no-reply@dev.corite.com");
 //    	System.out.println("client.getHTML \n>>>>>>>>>>>>\n" + client.getHTML("no-reply@dev.corite.com"));
         client.close();
     }

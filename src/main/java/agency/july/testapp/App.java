@@ -8,21 +8,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.yaml.snakeyaml.Yaml;
-
-import com.gargoylesoftware.htmlunit.WebConsole.Logger;
 
 import agency.july.config.models.Accesses;
 import agency.july.config.models.Configuration;
 import agency.july.flow.Admin;
 import agency.july.flow.Flow;
+import agency.july.flow.GoogleUser;
+import agency.july.flow.ReleaseStatus;
 import agency.july.flow.Test;
 import agency.july.flow.TestFailedException;
 import agency.july.flow.User;
 import agency.july.flow.CompaignStatus;
+import agency.july.flow.FacebookUser;
 import agency.july.logger.TestingLogger;
+import agency.july.sendmail.ImapClient;
 
 public class App {
 
@@ -47,12 +48,17 @@ public class App {
 				PASSED.setEnable(Configuration.getLogger().get("passed"));
 				FAILED.setEnable(Configuration.getLogger().get("failed"));
 				
+				// To make sure that there are no unread emails
+			    ImapClient imapClient = new ImapClient (Accesses.getEmail());
+			    imapClient.markAsSeen(Accesses.getLogins().get("noreply"));
+				
 				// Определяем потоки выполнения. Каждый тест в своем потоке
 				Thread threadLoginLogout = null;
 				Thread threadRegisterWithEmail = null;
 				Thread threadStartcampaign = null;
 				Thread threadReleaseinformation = null;
 				Thread threadIncorrectcard = null;
+				Thread threadReleaseCampaign = null;
 				
 				// Основное цикл по тестам
 				List <String> runningTests = Configuration.getRuntests();
@@ -67,23 +73,46 @@ public class App {
 							public void run() {
 								
 								Flow flow = new Flow( "loginlogout" );
-								User user = new User( flow ).withUser( "test" );
+								User euser = new User( flow ).withUser( "test" );
+								User guser = new GoogleUser( flow ).withUser( "google_account" );
+								User fuser = new FacebookUser( flow ).withUser( "fb_account" );
+								User currentUser = euser;
 								
 								try {			
+/*									
+									euser.login();
+									euser.logout();
 									
-						            user.login(); 
-						            user.logout(); 
-						            
+									currentUser = guser;
+									guser.login();
+									guser.logout(); 
+
+*/									currentUser = fuser;
+									fuser.login();
+									fuser.logout(); 
+
+									currentUser = guser;
+									guser.login();
+									guser.logout(); 
+
+									currentUser = fuser;
+									fuser.login();
+									
+									currentUser = guser;
+									guser.login();
+									
 								} catch (TestFailedException e) {
-									flow.makeScreenshot();
-									FAILED.writeln("Login or logout user with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+									flow.makeErrorScreenshot();
+									FAILED.writeln("Login or logout user with email '" + currentUser.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName());
 								} catch (Exception e) {
 									flow.makeScreenshot();
-									FAILED.writeln("Login or logout user with email '" + user.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+									FAILED.writeln("Login or logout user with email '" + currentUser.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName());
 									e.printStackTrace();
 								} finally {
 						            INFO.writeln("Login and logout user test finished");
-						            user.teardown();
+						            euser.teardown();
+						            guser.teardown();
+						            fuser.teardown();
 								}
 							}
 						});
@@ -97,12 +126,13 @@ public class App {
 							public void run() {
 								Flow flow = new Flow("registerwithemail");
 					            User newuser = new User( flow ).withUser( "newuser" );
-					            Admin admin = new Admin( flow ).withUser( "root" );
+					            Admin root = new Admin( flow ).withUser( "root" );
 								try {
+									root.login(); //LoginMode.EMAIL
+									root.gotoAdminPage();
+						            root.removeUser( newuser.getUserFullName() ); // Remove the newuser if he exists
 									newuser.register();
-									admin.login();
-								    admin.gotoAdminPage();
-								    admin.removeUser( newuser.getUserFullName() );
+									root.removeUser( newuser.getUserFullName() );
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
 									FAILED.writeln("Registration with email '" + newuser.getUserEmail() + "' has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
@@ -113,7 +143,7 @@ public class App {
 								} finally {
 						            INFO.writeln("Registration with email test finished");
 						            newuser.teardown();
-						            admin.teardown();
+						            root.teardown();
 								}
 							}
 						});
@@ -135,32 +165,34 @@ public class App {
 					            Admin admin = new Admin( flow ).withUser( "admin" );
 								
 								try {			
+						            root.login(); //LoginMode.EMAIL
+									root.gotoAdminPage();
+						            root.removeUser( newuser.getUserFullName() );
+
 						            newuser.register();
 						            
-									admin.login(); 
+									admin.login(); //LoginMode.EMAIL
 						            admin.setModeratorRole43(true);
 						            
-						            user.login(); 
+						            user.login(); //LoginMode.EMAIL
 						            user.startCampaign();
 						            
-						            admin.confirmModeration();
+						            admin.acceptCampaignByEmail();
 						            admin.setModeratorRole43(false);
 						            
 						            nonameUser.checkFirstCampaignInList();
 
 						            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(1));
 						            
-						            newuser.login();
+//						            newuser.login();
 						            newuser.buyCorites (campaignId); // With canceling for new users
 
 						            user.buyCorites (campaignId);
 						            
-						            root.login();
-									root.gotoAdminPage();
 						            root.removeUser( newuser.getUserFullName() );
 //*						            
 									root.removeCampaignOrders( campaignId );
-									root.removeCampaign(Configuration.getPatterns().get(1));
+									root.removeCampaignByName(Configuration.getPatterns().get(1));
 //*/						            
 								} catch (TestFailedException e) {
 									flow.makeScreenshot();
@@ -183,6 +215,79 @@ public class App {
 							threadStartcampaign.start();
 						break;
 						
+						case "releasecampaign" : 
+							
+							threadReleaseCampaign = new Thread (new Runnable() {
+							public void run() {
+								
+								Flow flow = new Flow( "releasecampaign" );
+
+								User creator = new User( flow ).withUser( "campaigncreator1" );
+								User backer = new User( flow ).withUser( "campaignbacker1" );
+					            Admin root = new Admin( flow ).withUser( "root" ); // Supper admin
+					            Admin admin = new Admin( flow ).withUser( "admin" );
+								
+								try {			
+						            root.login();
+									root.gotoAdminPage();
+
+									admin.login();
+									admin.gotoAdminPage();
+						            admin.setModeratorRole43(true);
+						            
+						            creator.login();
+						            creator.startCampaign();
+						            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(1));
+						            
+						            admin.acceptCampaignByEmail();
+						            
+						            creator.checkEmailLink("a.inform-creator-about-accept", "page-explore-view explore-full>article");
+
+						            creator.fillReleaseInfo(campaignId);
+						            
+						            backer.login();
+						            backer.buyCorites (campaignId);
+						            
+						            backer.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
+						            creator.checkEmailLink( "a[data-e2e=informCreatorAboutFunded]", "page-explore-view explore-full>article" );
+						            
+						            creator.makeReadyToRelease(campaignId);
+						            
+						            admin.acceptCampaignByEmail();
+//						            admin.moderateCampaign(campaignId, CompaignStatus.ACCEPT);
+						            
+						            creator.checkEmailLink("a[data-e2e=informCreatorAboutApproveReleaseInfo]", "page-explore-view explore-full>article");
+						            
+						            admin.setReleaseStatus(campaignId, ReleaseStatus.RELEASED);
+						            
+						            backer.checkEmailLink("a[data-e2e=informBackerAboutReleased]", "page-explore-list");
+						            creator.checkEmailLink("a[data-e2e=informCreatorAboutReleased]", "page-portfolio");
+						            
+						            admin.setModeratorRole43(false);
+//*						            
+									root.removeCampaignOrders( campaignId );
+									root.removeCampaignByName(Configuration.getPatterns().get(1));
+//*/						            
+								} catch (TestFailedException e) {
+									flow.makeScreenshot();
+									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+								} catch (Exception e) {
+									flow.makeScreenshot();
+									FAILED.writeln("Start Campaign flow has been failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+									e.printStackTrace();
+								} finally {
+						            INFO.writeln("Start Campaign test finished");
+						            creator.teardown();
+						            backer.teardown();
+						            root.teardown();
+						            admin.teardown();
+								}
+							}
+						});
+							threadReleaseCampaign.setName("ReleaseCampaign");
+							threadReleaseCampaign.start();
+						break;
+						
 						case "releaseinformation" : 
 							threadReleaseinformation = new Thread (new Runnable() {
 								public void run() {
@@ -194,14 +299,17 @@ public class App {
 									try {			
 										
 							            // Prepare initial state
-										admin.login(); 
+										admin.login();
+										admin.gotoAdminPage();
 							            admin.moderateCampaign("295", CompaignStatus.NONE);
 
 							            // Begin test
-							            user.login(); 
+							            user.login(); //LoginMode.EMAIL
 							            user.fillReleaseInfo("295");
 							            
-							            if ( admin.getCompaignStatus("295") == CompaignStatus.NEEDS_MODERATION ) 
+							            flow.sleep(1000); // Waiting for changing status of the campaign in database
+							            
+							            if ( admin.getCampaignStatus("295") == CompaignStatus.NEEDS_MODERATION ) 
 							            	PASSED.writeln("Release information of campaign #295 was filled in by '" + user.getUserEmail() + "'");
 							            else
 							            	throw new TestFailedException();
@@ -210,8 +318,6 @@ public class App {
 							            admin.moderateCampaign("295", CompaignStatus.DECLINE);
 							            
 							            user.checkDeclineEmail();
-							            
-//							            user.logout(); 
 							            
 									} catch (TestFailedException e) {
 										flow.makeScreenshot();
@@ -239,12 +345,9 @@ public class App {
 									User user = new User( flow ).withUser( "incorrectcard" );
 									
 									try {			
-										
-							            // Prepare initial state
-										
-							            // Begin test
-							            user.login(); 
-							            user.buyCoritesIncorrectCard("289", "4242424242424241");
+
+							            user.login(); //LoginMode.EMAIL
+							            user.buyCoritesIncorrectCard("289");
 							            							            
 									} catch (Exception e) {
 										flow.makeScreenshot();
@@ -267,6 +370,7 @@ public class App {
 				if (threadLoginLogout != null) threadLoginLogout.join();
 				if (threadRegisterWithEmail != null) threadRegisterWithEmail.join();
 				if (threadStartcampaign != null) threadStartcampaign.join();
+				if (threadReleaseCampaign != null) threadReleaseCampaign.join();
 				if (threadReleaseinformation != null) threadReleaseinformation.join();
 				if (threadIncorrectcard != null) threadIncorrectcard.join();
 

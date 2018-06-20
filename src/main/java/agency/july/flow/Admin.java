@@ -22,7 +22,7 @@ public class Admin extends User {
 	
 	private final String baseurl = Accesses.getUrls().get("adminbase");
 	private final String allUsers = baseurl + "/?entity=User&action=list&menuIndex=10&submenuIndex=-1";
-	private final String allCampaigns = baseurl + "/?entity=Campaign&action=list&menuIndex=2&submenuIndex=-1";
+	private final String allCampaigns = baseurl + "/?entity=Campaign&action=list&menuIndex=3&submenuIndex=-1";
 	private final String editUser43 = baseurl + "/?entity=User&action=edit&id=43";
 
 	// Explore page
@@ -148,9 +148,9 @@ public class Admin extends User {
 		driver.findElement(By.cssSelector("button.action-save")).click();		
 	}
 	
-	public void removeUser(String user) {
+	public void removeUser(String fullName) {
 		
-		ACTION.writeln("Remove an user : " + user);		
+		ACTION.writeln("Remove a user: " + fullName);		
 		flow.setDriver(driver);
 		driver.get(allUsers);
 		
@@ -160,30 +160,32 @@ public class Admin extends User {
 			driver.get(allUsers);
 			wait.until(ExpectedConditions.titleContains("All users"));
 
-			searchQuery.set(user);
+			searchQuery.set(fullName);
 			searchBtn.click();
-			dropdownMenuBtn.click();
-			deleteUserBtn.click();
-			confirmDeleteUserBtn.click();
-			
-			try {
-				wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("td.no-results")));
-				PASSED.writeln("User has been removed");
-			} catch (TimeoutException e) {
-				FAILED.writeln("User has not been removed or there ara other user(s) with the same full name");				
+			if ( dropdownMenuBtn.exists() ) { // Remove the user if he exists
+				dropdownMenuBtn.click();
+				deleteUserBtn.click();
+				confirmDeleteUserBtn.click();
+				try {
+					wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("td.no-results")));
+					PASSED.writeln("User has been removed");
+				} catch (TimeoutException e) {
+					FAILED.writeln("User has not been removed or there ara other user(s) with the same full name");
+					flow.makeErrorScreenshot();
+				}
 			}
 			
 		} catch (Exception e) {
-			FAILED.writeln("User has not been removed");
+			FAILED.writeln("Remove user error. User: " + fullName);
 			e.printStackTrace();
 			throw new TestFailedException();
 		}
 
 	}
 
-	public void removeCampaign(String campaignName) {
+	public void removeCampaignByName(String campaignName) {
 		
-		ACTION.writeln("Remove campaign");		
+		ACTION.writeln("Remove campaign '" + campaignName + "'");		
 		flow.setDriver(driver);
 		WebDriverWait wait = new WebDriverWait(driver, 5);
 		driver.get(allCampaigns);
@@ -199,9 +201,9 @@ public class Admin extends User {
 			
 			try {
 				wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("td.no-results")));
-				PASSED.writeln("Campaign has been removed");
+				PASSED.writeln("Campaign '" + campaignName + "' was removed");
 			} catch (TimeoutException e) {
-				FAILED.writeln("Campaign has not been removed or there ara other campaign(s) with the same name");				
+				FAILED.writeln("Campaign was not removed or there are other campaigns with the same name");				
 			}
 			
 		} catch (TestFailedException e) {
@@ -215,7 +217,7 @@ public class Admin extends User {
 	
 	public void removeCampaignOrders(String campaignId) {
 		
-		ACTION.writeln( "Remove all orders of campaign: " + campaignId );		
+		ACTION.writeln( "Remove all orders of campaign #" + campaignId );		
 		flow.setDriver(driver);
 		driver.get(this.getBaseUrl() + "?entity=Order&action=list");
 
@@ -232,12 +234,12 @@ public class Admin extends User {
 		}
 	}
 
-	public void confirmModeration() {
+	public void acceptCampaignByEmail() {
 		flow.setDriver(driver);
-
+		ACTION.writeln("Accept a campaign by email");
 		// Check email
 		try {
-			driver.get( getToken(
+			driver.get( getLinkFromEmail(
 				Accesses.getLogins().get("noreply"),	// from
 				this.userEmail,							// to
 				Configuration.getCsss().get("confirmlinks").get("moderation") // confirm link in the letter
@@ -248,13 +250,15 @@ public class Admin extends User {
 			
 		} catch (WebDriverException e) {
 			FAILED.writeln("The URL for moderation a new campaign is wrong");
+			flow.makeErrorScreenshot();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
 	
-	public CompaignStatus getCompaignStatus(String campaignId) {
+	public CompaignStatus getCampaignStatus(String campaignId) {
+		
+		ACTION.writeln("Get status for Campaign #" + campaignId);
 		flow.setDriver(driver);
 		driver.get( this.getBaseUrl() + "/?entity=Campaign&action=edit&id=" + campaignId );
 		WebDriverWait wait = new WebDriverWait(driver, 5);
@@ -267,14 +271,17 @@ public class Admin extends User {
 					case "0" : return CompaignStatus.NONE;
 					case "2" : return CompaignStatus.NEEDS_MODERATION;
 					case "1" : return CompaignStatus.ACCEPT;
-					case "-1" : return CompaignStatus.DECLINE;					
+					case "-1" : return CompaignStatus.DECLINE;
 				}
 			}
 		}
+		FAILED.writeln("Status for Campaign #" + campaignId + "don't receive");
 		return null;
 	}
 
 	public void moderateCampaign(String campaignId, CompaignStatus status) {
+		
+		ACTION.writeln("Moderate Campaign #" + campaignId + " to " + status + " status");
 		flow.setDriver(driver);
 		driver.get( this.getBaseUrl() + "/?entity=Campaign&action=edit&id=" + campaignId );
 		WebDriverWait wait = new WebDriverWait(driver, 5);
@@ -298,12 +305,31 @@ public class Admin extends User {
 		}
 		if ( checkboxModerator.getAttribute("checked") == null ) {
 			checkboxModerator.click();
-			try { // Без этой задержки работает нестабильно при DECLINE. Видимо из-за прорисовки окна для ввода сообщения
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
+			flow.sleep(500); // Без этой задержки работает нестабильно при DECLINE. Видимо из-за прорисовки окна для ввода сообщения			
+			driver.findElement(By.cssSelector("button.action-save")).click();		
+		}
+
+	}
+
+	public void setReleaseStatus(String campaignId, ReleaseStatus status) {
+		ACTION.writeln("Set Release Status of Campaign #" + campaignId + " to " + status + " status");
+		flow.setDriver(driver);
+		driver.get( this.getBaseUrl() + "/?entity=Release&action=changeReleaseStatus&id=" + campaignId );
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		wait.until(ExpectedConditions.titleContains("Set release status (#" + campaignId + ")"));
+		
+		WebElement checkboxModerator = null;
+		
+		switch (status) {
+		case READY_TO_RELEASE :
+			checkboxModerator = driver.findElement(By.cssSelector("input[name='release[status]'][value='2']"));
+			break;
+		case RELEASED :
+			checkboxModerator = driver.findElement(By.cssSelector("input[name='release[status]'][value='3']"));
+			break;
+		}
+		if ( checkboxModerator.getAttribute("checked") == null ) {
+			checkboxModerator.click();
 			driver.findElement(By.cssSelector("button.action-save")).click();		
 		}
 
