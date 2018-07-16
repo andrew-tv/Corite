@@ -9,17 +9,24 @@ import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import agency.july.config.models.Accesses;
+import agency.july.config.models.BrowserProps;
 import agency.july.config.models.Configuration;
+import agency.july.factory.BrowserFactory;
 import agency.july.sendmail.ImapClient;
 import agency.july.webelements.Element;
 import agency.july.webelements.Slider;
 import agency.july.webelements.TextInput;
 
-public class User extends Test {
+public class User /*extends Test*/ {
+	
+    protected WebDriver driver;
+    protected Flow flow;
+    protected int defaultImplicitly = 10;
 	
 	protected String userEmail = "No present";
 	protected String userFullName = "Noname";
@@ -28,6 +35,12 @@ public class User extends Test {
 	protected String userPasswd = "";
 	protected String userTel = "No present";
 	
+	// Stripe iframe
+	private TextInput cardNumber;
+	private TextInput expDate;
+	private TextInput cvc;
+	private TextInput zip;
+
 	// Common elements
 	private Element matError;
 	private Element submitBtn;
@@ -56,7 +69,6 @@ public class User extends Test {
 	private Slider slider;
 	private Element anotherCardBtn;
 	private Element newCardBtn;
-//	private Element campaignStatus;
 	private Element thankyou;
 	private Element iframe;
 	
@@ -82,14 +94,16 @@ public class User extends Test {
 	private TextInput textArea;
 	private Element iagree;
 	
-	// Stripe iframe
-	TextInput cardNumber = new TextInput(this.flow, By.cssSelector ("input[name=cardnumber]"));
-	TextInput expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
-	TextInput cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
-	TextInput zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
-	
-	public User(Flow flow) {
-		super(flow);
+	public User(Flow flow, BrowserProps props) {
+		this.driver = BrowserFactory.getDriver(props);
+		this.flow = flow;
+		
+		// Stripe iframe
+		cardNumber = new TextInput(this.flow, By.cssSelector ("input[name=cardnumber]"));
+		expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
+		expDate.setFirstWait(280);
+		cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
+		zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
 		
 		// Common elements
 		matError = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("commonelements").get("matError")));
@@ -113,7 +127,6 @@ public class User extends Test {
 		slider = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("slider")));
 		anotherCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherCardBtn")));
 		newCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newCardBtn")));
-//		campaignStatus = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("campaignStatus")));
 		iframe = new Element(this.flow, By.cssSelector ("ngx-stripe-card iframe"));
 		thankyou = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("thankyou")));
 		// Login page
@@ -126,8 +139,6 @@ public class User extends Test {
 		passwordNewIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordNewIn")));
 		passwordConfirmIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordConfirmIn")));
 		telephoneIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("telephoneIn")));
-		// Stripe iframe
-		expDate.setFirstWait(280);
 	}
 	
 	public User withUser(String user) {
@@ -793,6 +804,38 @@ public class User extends Test {
 			FAILED.writeln("There isn't campaign #" + campaignId + " on Explore list");
 			flow.makeErrorScreenshot();    	
 	    }
+    }
+    
+	public String getBaseUrl() {
+		return Accesses.getUrls().get("base");
+	}
+	
+    public void goHome() { 
+    	driver.get(Accesses.getUrls().get("base"));
+    }
+    
+	public void checkFormFillingError(boolean throwExeption) {
+		
+    	this.driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+
+		Element matError = new Element(this.flow, By.cssSelector("mat-error"));
+		if ( matError.exists() ) {
+			String errorText = matError.getText();
+			FAILED.writeln("Form filling error: '" + errorText + "'" );
+			if ( throwExeption ) throw new TestFailedException();
+		}
+		
+		matError = new Element(this.flow, By.cssSelector(".mat-error"));
+		if ( matError.exists() ) {
+			FAILED.writeln("Form filling error: '" + matError.getText() + "'" );
+			if ( throwExeption ) throw new TestFailedException();
+		}
+		
+    	this.driver.manage().timeouts().implicitlyWait(this.defaultImplicitly, TimeUnit.SECONDS);
+	}
+
+	public void teardown () {
+    	driver.quit();
     }
 
 }

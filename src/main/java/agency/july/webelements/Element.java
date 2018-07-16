@@ -1,10 +1,7 @@
 package agency.july.webelements;
 
-import static agency.july.logger.Logevent.*;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -55,7 +52,6 @@ public class Element {
 	
 	public boolean exists() {
 		try {
-			if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 			parentFlow.getDriver().findElement(by);
 		} catch (NoSuchElementException e) {
 			return false;
@@ -64,23 +60,17 @@ public class Element {
 	}
 	
 	public String getText () {
-		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 		refresh();
-//		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 		return this.el.getText();
 	}
 	
 	public void click () {
 
 		WebDriverWait wait = new WebDriverWait(parentFlow.getDriver(), 5);
-		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
-
 		wait.until( ExpectedConditions.elementToBeClickable(by) );
 		
 		refresh();
 		this.el.click();
-		
-//		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 	}
 
 	public String getAttr(String attr) {

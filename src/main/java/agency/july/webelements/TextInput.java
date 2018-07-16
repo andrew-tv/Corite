@@ -18,7 +18,7 @@ public class TextInput extends Element {
 	// Ввод текста в строку ввода
 	public void set(String value) {
 
-		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
+//		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 
 		refresh();
 		el.clear();
@@ -29,7 +29,7 @@ public class TextInput extends Element {
 
 	public void set(Keys key) {
 		
-		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
+//		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 
 		refresh();
 		el.sendKeys(key);

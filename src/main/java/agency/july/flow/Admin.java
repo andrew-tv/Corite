@@ -13,6 +13,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import agency.july.config.models.Accesses;
+import agency.july.config.models.BrowserProps;
 import agency.july.config.models.Configuration;
 import agency.july.webelements.Element;
 import agency.july.webelements.TextInput;
@@ -42,8 +43,8 @@ public class Admin extends User {
 	private Element saveChangesModeration;
 	private TextInput campaignModerationComment;
 
-	public Admin(Flow flow) {
-		super(flow);
+	public Admin(Flow flow, BrowserProps props) {
+		super(flow, props);
 	    
 		// Explore page	    
 	    menuAdmin = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuAdmin")));

@@ -11,10 +11,10 @@ public interface IFlow {
 //	public void incSlideNumber();
 	public int getCurrentSlideNumber();
 //	public void waitForHtmlHash();
-	public void waitForHtmlHash(By by);
+//	public void waitForHtmlHash(By by);
 	public void makeScreenshot();
 	public void makeScreenshot(String prefix);
-	int getExpectedHtmlHash();
+//	int getExpectedHtmlHash();
 	public void sleep(int millis);
 	void waitForStableLocation(By by, int firstWait);
 	void waitForStableLocation(WebElement el, int firstWait);

@@ -1,15 +1,7 @@
 # Corite
 
-browser:
-    CHROME_HEADLESS
-#browser: FIREFOX_HEADLESS
-
-dimension:
-    width: 375
-    hight: 667
-    
 browsers:
-    IPhone:
+    IPhone6:
         type: CHROME_HEADLESS
         file: "./chromedriver"
         width: 375
@@ -119,35 +111,35 @@ csss:
        country: "#mat-option-83"
        date: "input[min]"
  
-flowsss:
-    befor_testing:
-    after_testing:
+#flowsss:
+#    befor_testing:
+#    after_testing:
     
-    loginlogout:
+#    loginlogout:
 
-    registerwithemail:
+#    registerwithemail:
     
-    releaseinformation:
+#    releaseinformation:
 #0 Page after cliking on link in campaign declining email message. Campaign Id: 295
 #      - csss: "page-campaign-own-edit"
 #        hash: "-181239646" #"593831657"
         
-    releasecampaign:
-      - csss: "page-campaign-own-edit"
-        hash: "6"
+#    releasecampaign:
+#      - csss: "page-campaign-own-edit"
+#        hash: "6"
     
-    startcampaign:
+#    startcampaign:
 #0 
-      - csss: "explore-teaser" # css selector to check hash of its innerhtml
-        hash: "6" # hashcode of the element's innerHTML
+#      - csss: "explore-teaser" # css selector to check hash of its innerhtml
+#        hash: "6" # hashcode of the element's innerHTML
 #1
-      - csss: "page-explore-view"
-        hash: "1"
+#      - csss: "page-explore-view"
+#        hash: "1"
 #2
-      - csss: "page-explore-view"
-        hash: "2"
+#      - csss: "page-explore-view"
+#        hash: "2"
         
-    incorrectcard:
+#    incorrectcard:
     
 patterns:
 #  id: pattern
@@ -164,9 +156,9 @@ logger:
     failed: true
 
 runtests:
-#   - loginlogout
+   - loginlogout
 #   - registerwithemail
-   - startcampaign
+#   - startcampaign
 #   - releaseinformation
-#   - releasecampaign
+   - releasecampaign
 #   - incorrectcard

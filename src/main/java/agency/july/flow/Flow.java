@@ -18,25 +18,24 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import agency.july.config.models.Accesses;
-import agency.july.config.models.Configuration;
-import agency.july.webelements.Element;
+//import agency.july.config.models.Configuration;
 
 public class Flow implements IFlow {
 	
 	private WebDriver driver;
 	private String flowName;
 	private String pathToScreenshots;
-	private List< Map < String, String > > flowMap;
+//	private List< Map < String, String > > flowMap;
 	private int currentSlideNumber = 0;
 	private int currentError = 0;
 	
-	private int dutycycle = 500;
-	private int repetitions = 16;
+//	private int dutycycle = 500;
+//	private int repetitions = 16;
 	
 	public Flow (String flowName) {
 		this.flowName = flowName;
-		this.pathToScreenshots = Accesses.getPathto().get("screenshots") + Configuration.getBrowser().toString() + "/";
-		this.flowMap = Configuration.getFlowsss().get(this.flowName);
+		this.pathToScreenshots = Accesses.getPathto().get("screenshots")/* + Configuration.getBrowser().toString() + "/"*/;
+//		this.flowMap = Configuration.getFlowsss().get(this.flowName);
 	}
 	
 	public String getFlowName() {
@@ -54,11 +53,7 @@ public class Flow implements IFlow {
 			e.printStackTrace();
 		}		
 	}
-/*
-	public void incSlideNumber() {
-		currentSlideNumber++;
-	}
-*/	
+
 	public String getPathToScreenshots() {
 		return pathToScreenshots;
 	}
@@ -143,7 +138,6 @@ public class Flow implements IFlow {
 		        + ste.getLineNumber() + ".html" )) {
 		    out.println(source);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}	
@@ -153,7 +147,7 @@ public class Flow implements IFlow {
 		byte[] bytes = ( (TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES );
 		return java.util.Arrays.hashCode(bytes);
 	}
-	
+/*	
 	@Override
 	public int getExpectedHtmlHash() {
 		return Integer.parseInt( flowMap.get(this.currentSlideNumber).get("hash") );
@@ -175,7 +169,7 @@ public class Flow implements IFlow {
 		this.currentSlideNumber++;
 		return hash == expectedHash;
 	}
-
+*//*
 	@Override
 	public void waitForHtmlHash(By by) {
 		Element el = new Element(this, by);
@@ -205,7 +199,7 @@ public class Flow implements IFlow {
 			}
 		}
 	}
-
+*/
 	@Override
 	public void waitForStableLocation(By by, int firstWait) {
 //		System.out.println(">> " + by);

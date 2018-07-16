@@ -12,12 +12,12 @@ import java.util.List;
 import org.yaml.snakeyaml.Yaml;
 
 import agency.july.config.models.Accesses;
+import agency.july.config.models.BrowserProps;
 import agency.july.config.models.Configuration;
 import agency.july.flow.Admin;
 import agency.july.flow.Flow;
 import agency.july.flow.GoogleUser;
 import agency.july.flow.ReleaseStatus;
-import agency.july.flow.Test;
 import agency.july.flow.TestFailedException;
 import agency.july.flow.User;
 import agency.july.flow.CompaignStatus;
@@ -53,16 +53,20 @@ public class App {
 			PASSED.setEnable(Configuration.getLogger().get("passed"));
 			FAILED.setEnable(Configuration.getLogger().get("failed"));
 			
+			// Browsers for testing
+			BrowserProps descTopBrowser = Configuration.getBrowsers().get("DescTop");
+			BrowserProps iPhone6Browser = Configuration.getBrowsers().get("IPhone6");
+			
 			// Predefined conditions
 			// To make sure that there are no unread emails
 		    ImapClient imapClient = new ImapClient (Accesses.getEmail());
 		    imapClient.markAsSeen(Accesses.getLogins().get("noreply"));
 		    
-		    admin = new Admin( new Flow( "befor_after_testing" ) ).withUser( "admin" );
+		    admin = new Admin( new Flow( "befor_after_testing" ), descTopBrowser ).withUser( "admin" );
 			admin.login();
 			admin.navigateToAdminPage();
             admin.setModeratorRole43(true); // Set moderator role for admin
-		    root = new Admin( new Flow( "befor_after_testing" ) ).withUser( "root" );
+		    root = new Admin( new Flow( "befor_after_testing" ), descTopBrowser ).withUser( "root" );
 		    root.login();
 		    root.navigateToAdminPage();
 		    root.removeUsers("temporary");		    
@@ -79,7 +83,7 @@ public class App {
 			
 			// Основное цикл по тестам
 			List <String> runningTests = Configuration.getRuntests();
-			if (runningTests != null) 
+			if (runningTests != null)
 			for (int i = 0; i < runningTests.size(); i++) {
 				
 				switch (runningTests.get(i)) {
@@ -90,9 +94,9 @@ public class App {
 						public void run() {
 							
 							Flow flow = new Flow( "loginlogout" );
-							User euser = new User( flow ).withUser( "test" );
-							User guser = new GoogleUser( flow ).withUser( "google_account" );
-							User fuser = new FacebookUser( flow ).withUser( "fb_account" );
+							User euser = new User( flow, iPhone6Browser ).withUser( "test" );
+							User guser = new GoogleUser( flow, iPhone6Browser ).withUser( "google_account" );
+							User fuser = new FacebookUser( flow, iPhone6Browser ).withUser( "fb_account" );
 							User currentUser = euser;
 								
 							try {			
@@ -141,7 +145,7 @@ public class App {
 						threadRegisterWithEmail = new Thread (new Runnable() {
 						public void run() {
 							Flow flow = new Flow("registerwithemail");
-				            User newuser = new User( flow ).withUser( "newuser" );
+				            User newuser = new User( flow, iPhone6Browser ).withUser( "newuser" );
 							try {
 								newuser.register();
 					            newuser.checkEmailLink("a.confirm-registration", "page-account-check"); // Confirm registration
@@ -169,11 +173,11 @@ public class App {
 							
 							Flow flow = new Flow( "startcampaign" );
 
-							User nonameUser = new User( flow );
+							User nonameUser = new User( flow, iPhone6Browser );
 							nonameUser.goHome();
-							User user = new User( flow ).withUser( "test" );
-				            User newuser = new User( flow ).withUser( "newuser_startcampaign" );
-				            Admin admin = new Admin( flow ).withUser( "admin" );
+							User user = new User( flow, iPhone6Browser ).withUser( "test" );
+				            User newuser = new User( flow, iPhone6Browser ).withUser( "newuser_startcampaign" );
+				            Admin admin = new Admin( flow, iPhone6Browser ).withUser( "admin" );
 							
 							try {			
 					            newuser.register();
@@ -228,10 +232,10 @@ public class App {
 							
 							Flow flow = new Flow( "releasecampaign" );
 
-							User creator = new User( flow ).withUser( "campaigncreator1" );
-							User backer = new User( flow ).withUser( "campaignbacker1" );
-							User backerTwo = new User( flow ).withUser( "campaignbacker2" );
-				            Admin admin = new Admin( flow ).withUser( "admin" );
+							User creator = new User( flow, iPhone6Browser ).withUser( "campaigncreator1" );
+							User backer = new User( flow, iPhone6Browser ).withUser( "campaignbacker1" );
+							User backerTwo = new User( flow, iPhone6Browser ).withUser( "campaignbacker2" );
+				            Admin admin = new Admin( flow, descTopBrowser ).withUser( "admin" );
 							
 							try {			
 								admin.login();
@@ -315,8 +319,8 @@ public class App {
 							public void run() {
 								
 								Flow flow = new Flow( "releaseinformation" );
-								User user = new User( flow ).withUser( "test" );
-								Admin admin = new Admin( flow ).withUser( "admin" );
+								User user = new User( flow, iPhone6Browser ).withUser( "test" );
+								Admin admin = new Admin( flow, descTopBrowser ).withUser( "admin" );
 								
 								try {			
 									
@@ -364,7 +368,7 @@ public class App {
 							public void run() {
 								
 								Flow flow = new Flow( "incorrectcard" );
-								User user = new User( flow ).withUser( "incorrectcard" );
+								User user = new User( flow, iPhone6Browser ).withUser( "incorrectcard" );
 								
 								try {			
 
@@ -394,7 +398,6 @@ public class App {
 						break;
 					}
 				}
-				
 			// Ожидание выполнения всех потоков (тестов)
 			if (threadLoginLogout != null) threadLoginLogout.join();
 			if (threadRegisterWithEmail != null) threadRegisterWithEmail.join();
@@ -402,6 +405,7 @@ public class App {
 			if (threadReleaseCampaign != null) threadReleaseCampaign.join();
 			if (threadReleaseinformation != null) threadReleaseinformation.join();
 			if (threadIncorrectcard != null) threadIncorrectcard.join();
+				
 			
             // Reset moderator role for admin
             admin.setModeratorRole43(false);

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.openqa.selenium.By;
 
+import agency.july.config.models.BrowserProps;
 import agency.july.config.models.Configuration;
 import agency.july.webelements.Element;
 import agency.july.webelements.TextInput;
@@ -19,8 +20,8 @@ public class FacebookUser extends User {
 	private TextInput facebookPasswordIn;
 	private Element facebookLoginBtn;
 
-	public FacebookUser(Flow flow) {
-		super(flow);
+	public FacebookUser(Flow flow, BrowserProps props) {
+		super(flow, props);
 		
 		facebookBtn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("facebookBtn")) );
 		facebookEmailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("facebookEmailIn")) );
@@ -35,12 +36,11 @@ public class FacebookUser extends User {
 		Set<String> beforeWinHandles = driver.getWindowHandles();
 		beforeWinHandles.forEach(System.out::println);
 
-		flow.sleep(1000);
+//		flow.sleep(1000);
 		facebookBtn.click();
 		
 		flow.sleep(1000);
 		
-		flow.makeScreenshot("F1");
 		Set<String> afterWinHandles = driver.getWindowHandles();
 		afterWinHandles.forEach(System.out::println);
 		
@@ -53,13 +53,13 @@ public class FacebookUser extends User {
 			
 			afterWinHandles.forEach(driver.switchTo()::window);
 			
-			System.out.println(userEmail);
-			System.out.println(userPasswd);
+//			System.out.println(userEmail);
+//			System.out.println(userPasswd);
 			
 			facebookEmailIn.set(userEmail);
-			flow.sleep(500);
+//			flow.sleep(500);
 			facebookPasswordIn.set(userPasswd);
-			flow.sleep(100);
+//			flow.sleep(100);
 			
 			facebookLoginBtn.click();
 			

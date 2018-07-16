@@ -20,7 +20,7 @@ public class Selection extends Element {
 	// Choice from dropdown list
 	public void set(String value) {
 
-		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
+//		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 
 		refresh();
 		

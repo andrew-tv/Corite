@@ -7,6 +7,7 @@ import java.util.Set;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 
+import agency.july.config.models.BrowserProps;
 import agency.july.config.models.Configuration;
 import agency.july.webelements.Element;
 import agency.july.webelements.TextInput;
@@ -21,8 +22,8 @@ public class GoogleUser extends User {
 	private Element googleIdentifierNextBtn;
 	private Element googlePasswordNextBtn;
 
-	public GoogleUser(Flow flow) {
-		super(flow);
+	public GoogleUser(Flow flow, BrowserProps props) {
+		super(flow, props);
 		
 		googleBtn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("googleBtn")) );
 		googleEmailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("googleEmailIn")) );
@@ -38,7 +39,7 @@ public class GoogleUser extends User {
 		Set<String> beforeWinHandles = driver.getWindowHandles();
 		beforeWinHandles.forEach(System.out::println);
 
-		flow.sleep(1000);
+//		flow.sleep(1000);
 		googleBtn.click();
 		
 		flow.sleep(1000);
@@ -56,14 +57,14 @@ public class GoogleUser extends User {
 			afterWinHandles.forEach(driver.switchTo()::window);
 			driver.manage().window().setSize(new Dimension(800, 600) );
 			
-			System.out.println(userEmail);
-			System.out.println(userPasswd);
+//			System.out.println(userEmail);
+//			System.out.println(userPasswd);
 			
 			googleEmailIn.set(userEmail);
 			googleIdentifierNextBtn.click();
 			flow.sleep(1000);
 			googlePasswordIn.set(userPasswd);
-			flow.sleep(100);
+//			flow.sleep(100);
 			googlePasswordNextBtn.click();
 			
 			driver.switchTo().window(windowHandle);

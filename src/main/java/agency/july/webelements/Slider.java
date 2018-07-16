@@ -15,7 +15,7 @@ public class Slider extends Element {
 
 	public void set(int percentPosition) {
 		
-		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
+//		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 
 		refresh();
 
