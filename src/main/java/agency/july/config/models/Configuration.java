@@ -6,69 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 public final class Configuration {
-//	private static Map< String, String > logins;
-//	private static Map< String, String > passwds;
-//	private static Map< String, String > usernames;
-//	private static Map< String, String > urls;
-//	private static Map< String, String > pathto;
-//	private static List < String > images;
-//	private static EmailParams email;
 	private static DriverType browser;
 	private static Map< String, Integer > dimension;
+	private static Map< String, Browser > browsers;
 	private static Map< String, Map< String, String > > csss;
 	private static Map< String, List < Map < String, String > > > flowsss;
 	private static Map< Integer, String > patterns;
 	private static Map< String, Boolean > logger;
 	private static List< String > runtests;
-/*	
-	public static Map< String, String > getLogins() {
-        return logins;
-    }
- 
-    public void setLogins(Map< String, String > logins) {
-    	Configuration.logins = logins;
-    }
-    
-	public static Map< String, String > getPasswds() {
-        return passwds;
-    }
- 
-    public void setPasswds(Map< String, String > passwds) {
-    	Configuration.passwds = passwds;
-    }
 
-	public static Map< String, String > getUsernames() {
-        return usernames;
-    }
- 
-    public void setUsernames(Map< String, String > usernames) {
-    	Configuration.usernames = usernames;
-    }
-
-	public static Map< String, String > getUrls() {
-        return urls;
-    }
- 
-    public void setUrls(Map< String, String > urls) {
-    	Configuration.urls = urls;
-    }
-
-	public static Map< String, String > getPathto() {
-        return pathto;
-    }
- 
-    public void setPathto(Map< String, String > pathto) {
-    	Configuration.pathto = pathto;
-    }
-
-	public static EmailParams getEmail() {
-        return email;
-    }
- 
-	public void setEmail(EmailParams email) {
-		Configuration.email = email;
-	}
-*/
 	public static DriverType getBrowser() {
         return browser;
     }
@@ -84,6 +30,14 @@ public final class Configuration {
     public void setDimension(Map< String, Integer > dimension) {
     	Configuration.dimension = dimension;
     }
+
+	public static Map<String, Browser> getBrowsers() {
+		return browsers;
+	}
+
+	public void setBrowsers(Map<String, Browser> browsers) {
+		Configuration.browsers = browsers;
+	}
 
 	public static Map<String, Map<String, String>> getCsss() {
 		return csss;
@@ -124,26 +78,13 @@ public final class Configuration {
     public void setRuntests(List< String > runtests) {
     	Configuration.runtests = runtests;
 	}
-/*
-	public static List<String> getImages() {
-		return images;
-	}
 
-	public void setImages(List<String> images) {
-		Configuration.images = images;
-	}
-*/
     @Override
     public String toString() {
         return new StringBuilder()
-//            .append( format( "Logins: %s\n", logins ) )
-//            .append( format( "Passwds: %s\n", passwds ) )
-//            .append( format( "Usernames: %s\n", usernames ) )
-//            .append( format( "Urls: %s\n", urls ) )
-//            .append( format( "PathTo: %s\n", pathto ) )
-//            .append( format( "Email: %s\n", email ) )
             .append( format( "Browser: %s\n", browser ) )
-            .append( format( "Dimension: %s\n", dimension ) )
+            .append( format( "Dimension: %s\n", dimension ) ) //browsers
+            .append( format( "Browsers: %s\n", browsers ) )
             .append( format( "CSS selectors: %s\n", csss ) )
             .append( format( "Flowsss: %s\n", flowsss ) )
             .append( format( "Patterns: %s\n", patterns ) )
@@ -151,5 +92,4 @@ public final class Configuration {
             .append( format( "RunningTests: %s\n", runtests ) )
             .toString();
     }
-
 }

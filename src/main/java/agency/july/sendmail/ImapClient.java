@@ -16,6 +16,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.sun.mail.imap.IMAPFolder;
@@ -172,7 +173,7 @@ public class ImapClient  {
                 	return mimeMultipart2.getBodyPart(0).getContent().toString();
                 } else {
                 	// Неизвестный тип почтового сообщения
-                	System.out.println("Unknown type of BodyPart");
+                	System.err.println("Unknown type of BodyPart");
                 }
             }
             lastReadMessage = result;
@@ -237,10 +238,10 @@ public class ImapClient  {
 //    	        System.out.println( "to: readMsgs() >> " + message[i].getRecipients(Message.RecipientType.TO)[0].toString() );
    	     // Сообщение удовлетворяет заданным параметрам, то есть пришло от from и было направлено to
 	        	if (messages[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && messages[i].getFrom()[0].toString().contains(from)) { 
-//		        	String html = getHTMLFromCoriteMessage(message[i]);
-//		        	Document doc = Jsoup.parse(html);
+		        	String html = getHTMLFromCoriteMessage(messages[i]);
+		        	
 //	    	        System.out.println("before getHTMLFromCoriteMessage >> ");
-		        	Element link = Jsoup.parse( getHTMLFromCoriteMessage(messages[i]) ).select(selector).first();
+		        	Element link = Jsoup.parse(html).select(selector).first();
 		        	if (link != null) {
 		        		String linkHref = link.attr("href");
 		        		messages[i].setFlag(Flag.SEEN, true); 
@@ -248,6 +249,40 @@ public class ImapClient  {
 //		    	        System.out.println("linkHref >> " + linkHref);
 		        		
 		        		return linkHref;
+		        	}
+	        	}
+	        	// Восстанавливаем для всех "не наших" писем флаг "не просмотрено" (чтобы не нарушать состояние почты из-за автоматического перебора писем)
+	        	messages[i].setFlag(Flag.SEEN, false); 
+	        }    
+	    } catch (MessagingException e) {
+	        System.err.println("Error: readMsgs() >> " + e);
+        } catch (IOException ex) {
+            System.err.println("IO Error: readMsgs() >> " + ex);
+        }
+    	return ""; 
+    }
+    
+    // Перебирает все непросмотренные письма и выбирает первое, которое пришло от from и было направлено to и по selector возвращает ссылку
+    public String getHref (String from, String to, String selector, String content) {
+	   	try {
+	        for (int i = 0; i < messages.length; i++) {
+//    	        System.out.println( "from: readMsgs() >> " + message[i].getFrom()[0].toString() );
+//    	        System.out.println( "to: readMsgs() >> " + message[i].getRecipients(Message.RecipientType.TO)[0].toString() );
+   	     // Сообщение удовлетворяет заданным параметрам, то есть пришло от from и было направлено to
+	        	if (messages[i].getRecipients(Message.RecipientType.TO)[0].toString().contains(to) && messages[i].getFrom()[0].toString().contains(from)) { 
+		        	String html = getHTMLFromCoriteMessage(messages[i]);
+		        	
+		        	if ( html.contains(content) ) {
+	//	    	        System.out.println("before getHTMLFromCoriteMessage >> ");
+			        	Element link = Jsoup.parse(html).select(selector).first();
+			        	if (link != null) {
+			        		String linkHref = link.attr("href");
+			        		messages[i].setFlag(Flag.SEEN, true); 
+		//	        		message[i].setFlag(Flag.DELETED, true);
+	//		    	        System.out.println("linkHref >> " + linkHref);
+			        		
+			        		return linkHref;
+			        	}
 		        	}
 	        	}
 	        	// Восстанавливаем для всех "не наших" писем флаг "не просмотрено" (чтобы не нарушать состояние почты из-за автоматического перебора писем)

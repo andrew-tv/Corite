@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -20,12 +21,12 @@ import agency.july.webelements.TextInput;
 
 public class User extends Test {
 	
-	protected String userEmail = "";
-	protected String userFullName = "";
-	protected String userFirstName = "";
-	protected String userLastName = "";
+	protected String userEmail = "No present";
+	protected String userFullName = "Noname";
+	protected String userFirstName = "Noname";
+	protected String userLastName = "Noname";
 	protected String userPasswd = "";
-	protected String userTel = "";
+	protected String userTel = "No present";
 	
 	// Common elements
 	private Element matError;
@@ -35,16 +36,27 @@ public class User extends Test {
 	// Explore page
 	private Element loginBtn;
 	protected Element profileBtn;
-	private Element menuMyCampaign;
+	private Element menuMyCampaigns;
+	private Element menuPortfolio;
 	private Element menuLogoutBtn;
 	private Element userNameTxt;
+	private Element startCampaignTab;
+	private Element exploreTab;
 	
-	// Explore a Campaign page
+	// Campaign view page
+	By campaignViewPageBy = By.cssSelector("page-explore-view");
+	private Element buyCoritesBtn;
+	
+	// Portfolio page
+	By portfolioPageBy = By.cssSelector("page-portfolio");
+	private Element releasedCampaignName;
+	private Element releasedMyCorites;
 
 	// Invest page
 	private Slider slider;
-	private Element campaignStatus;
-	private Element buyCoritesBtn;
+	private Element anotherCardBtn;
+	private Element newCardBtn;
+//	private Element campaignStatus;
 	private Element thankyou;
 	private Element iframe;
 	
@@ -59,7 +71,6 @@ public class User extends Test {
 	private TextInput passwordNewIn;
 	private TextInput passwordConfirmIn;
 	private TextInput telephoneIn;
-	private Element startCampaignTab;
 	
 	// Start Campaign page
 	private TextInput campaignImage;
@@ -69,7 +80,13 @@ public class User extends Test {
 	private TextInput campaignGenre;
 	private Element campaignGenreSelect;
 	private TextInput textArea;
-	private Element iagree;	
+	private Element iagree;
+	
+	// Stripe iframe
+	TextInput cardNumber = new TextInput(this.flow, By.cssSelector ("input[name=cardnumber]"));
+	TextInput expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
+	TextInput cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
+	TextInput zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
 	
 	public User(Flow flow) {
 		super(flow);
@@ -81,20 +98,27 @@ public class User extends Test {
 		// Explore page
 		loginBtn =	new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("loginBtn")) );
 		profileBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("profileBtn")) );
-		menuMyCampaign = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuMyCampaign")));
+		menuMyCampaigns = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuMyCampaigns")));
+		menuPortfolio = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuPortfolio")));
 		menuLogoutBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuLogoutBtn")) );
 		userNameTxt = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("userNameTxt")) );
 		startCampaignTab = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("startCampaignTab")));
+		exploreTab = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("exploreTab")));
+		// Portfolio page
+		releasedCampaignName = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("portfoliopage").get("releasedCampaignName")));
+		releasedMyCorites = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("portfoliopage").get("releasedMyCorites")));
+		// Campaign view page
+		buyCoritesBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("buyCoritesBtn")));
 		// Invest page
 		slider = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("slider")));
-		campaignStatus = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("campaignStatus")));
-		buyCoritesBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("buyCoritesBtn")));
+		anotherCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherCardBtn")));
+		newCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newCardBtn")));
+//		campaignStatus = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("campaignStatus")));
 		iframe = new Element(this.flow, By.cssSelector ("ngx-stripe-card iframe"));
 		thankyou = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("thankyou")));
 		// Login page
 		emailIn = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("loginpage").get("email")) );
-		passwordIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("password")) );
-		
+		passwordIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("loginpage").get("password")) );		
 		// Register page
 		yourEmailIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("yourEmailIn")));
 		firstNameIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("firstNameIn")));
@@ -102,6 +126,8 @@ public class User extends Test {
 		passwordNewIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordNewIn")));
 		passwordConfirmIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordConfirmIn")));
 		telephoneIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("telephoneIn")));
+		// Stripe iframe
+		expDate.setFirstWait(280);
 	}
 	
 	public User withUser(String user) {
@@ -115,6 +141,14 @@ public class User extends Test {
 		return this;
 	}
 
+	public String getFirstName() {
+		return userFirstName;
+	}
+
+	public String getLastName() {
+		return userLastName;
+	}
+
 	public String getUserFullName() {
 		return userFullName;
 	}
@@ -123,7 +157,6 @@ public class User extends Test {
 		return userEmail;
 	}
 	
-//	@Override
 	protected void fillLoginForm() {
 		emailIn.set(userEmail);
 		submitBtn.click();
@@ -132,7 +165,7 @@ public class User extends Test {
 		submitBtn.click();
 	}
 
-	public void login (/*LoginMode loginMode*/) {
+	public void login () {
 		
 		ACTION.writeln("Login user : " + this.userEmail);		
 		flow.setDriver(driver);
@@ -143,9 +176,8 @@ public class User extends Test {
 			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.welcome")) );
 			PASSED.writeln("Welcome page was reached");
 		} catch (TimeoutException e) {
-			FAILED.writeln("Welcome page was not reached");
+			FAILED.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
 			flow.makeErrorScreenshot();
-			throw new TestFailedException();
 		}
 		
 		try {
@@ -171,12 +203,9 @@ public class User extends Test {
 					PASSED.writeln("User '" + userNameTxt.getText() + "' logged in");
 				}
 				
-			} else {
-				if ( userNameTxt.exists() ) {
+			} else if ( userNameTxt.exists() ) 
 					WARNING.writeln("The user has been already logged in, but expected otherwise : " + this.userEmail 
 							+ ". User name: " + userNameTxt.getText());
-				}
-			}
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
 		} catch (Exception e) {
@@ -195,7 +224,6 @@ public class User extends Test {
 			if ( userNameTxt.exists() ) {
 				
 				profileBtn.click();
-				flow.sleep(50);
 				menuLogoutBtn.click();
 				
 			} else {
@@ -209,10 +237,52 @@ public class User extends Test {
 			throw new TestFailedException();
 		}
 	}
+	
+    public void navigateToExplore() {
+//		ACTION.writeln("Navigate to Explore list" + this.getUserFullName());
+    	driver.findElement(By.cssSelector(Configuration.getCsss().get("explorepage").get("exploreTab"))).click();
+	}
 
+	public void navigateToPortfolio() {
+		ACTION.writeln("Navigate to portfolio of user: " + this.getUserFullName());
+		flow.setDriver(driver);
+		
+		profileBtn.click();
+		menuPortfolio.click();
+		
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 5);
+			wait.until(ExpectedConditions.presenceOfElementLocated( portfolioPageBy ));
+			PASSED.writeln("Portfolio page was reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Portfolio page wasn't reached");
+			throw new TestFailedException();			
+		}	
+	}
+
+	public void navigateToCampaign(String campaignId) {
+		ACTION.writeln("Navigate to campaign #" + campaignId);
+		flow.setDriver(driver);
+		
+		String cssS = Configuration.getCsss().get("explorepage").get("teaserCampaign").replace("{id}", campaignId);
+		Element campaign = new Element(this.flow, By.cssSelector (cssS));
+		
+		exploreTab.click();
+		campaign.click();
+		
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 5);
+			wait.until(ExpectedConditions.presenceOfElementLocated( campaignViewPageBy ));
+			PASSED.writeln("Campaign view page was reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Campaign view page wasn't reached");
+			throw new TestFailedException();			
+		}	
+	}
+	
 	public void register () {
 		
-		ACTION.writeln("Register an user : " + this.userEmail);
+		ACTION.writeln("Register an user: " + this.userEmail);
 		flow.setDriver(driver);
 		driver.get(Accesses.getUrls().get("dev") + "/user/register");
 		WebDriverWait wait = new WebDriverWait(driver, 10);
@@ -232,32 +302,10 @@ public class User extends Test {
 			passwordNewIn.set(userPasswd);
 			passwordConfirmIn.set(userPasswd);
 			telephoneIn.set(userTel);
-			
-			Thread.sleep(1000); // Без этой задержки не работает. Почему???
 			submitBtn.click();
 
 			checkFormFillingError(true);
-			// Check email
-			try {
-				driver.get( getLinkFromEmail(
-					Accesses.getLogins().get("noreply"),	// from
-					this.getUserEmail(),								// to
-					Configuration.getCsss().get("confirmlinks").get("registration") // confirm link in the letter
-				));
-			} catch (TestFailedException e) {
-				FAILED.writeln("User registration was failed. User email: " + this.getUserEmail() );
-				throw new TestFailedException();				
-			} 
-			
-			try {
-				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-account-check")) );
-				PASSED.writeln("Thankyou page of registration has been reached");
-			} catch (TimeoutException e1) {
-				FAILED.writeln("Thankyou page  of registration has not been reached");
-//				throw new TestFailedException();
-			}
-			
-						
+
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
 		} catch (Exception e) {
@@ -269,7 +317,7 @@ public class User extends Test {
 	protected String getLinkFromEmail (String sender, String recipient, String selector) throws InterruptedException {
 		String link = "";
 		ACTION.writeln("Waiting for email in \"" + Accesses.getEmail().getFolder() + "\" folder >> ");
-		for (int i = 0; i < 5; i++) { // Waiting for the email
+		for (int i = 0; i < 20; i++) { // Waiting for the email
 			Thread.sleep(5000);
 		    ImapClient imapClient = new ImapClient (Accesses.getEmail());
 		    
@@ -290,7 +338,31 @@ public class User extends Test {
 		return link;
 	}
 	
-	public void startCampaign () {
+	protected String getLinkFromEmail (String sender, String recipient, String selector, String content) throws InterruptedException {
+		String link = "";
+		ACTION.writeln("Waiting for email in \"" + Accesses.getEmail().getFolder() + "\" folder >> ");
+		for (int i = 0; i < 20; i++) { // Waiting for the email
+			Thread.sleep(5000);
+		    ImapClient imapClient = new ImapClient (Accesses.getEmail());
+		    
+			link = imapClient.getHref( sender, recipient, selector, content );
+			
+	    	imapClient.close();
+			if ( !link.isEmpty() ) break;
+		}
+		if ( link.isEmpty() ) {
+			FAILED.writeln("The link was not received in the email or the time was out." 
+					+ "\n\tSender: " + sender
+					+ "\n\tRecipient: " + recipient
+					+ "\n\tCss selector of the link: " + selector);
+			throw new TestFailedException();
+		} else {
+			PASSED.writeln("The link was received: " + link);
+		}
+		return link;
+	}
+	
+	public void startCampaign (String name) {
 		
 		campaignImage = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignImage"))/*, By.cssSelector("page-my-campaigns")*/);
 		campaignSong = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignSong")));
@@ -300,10 +372,8 @@ public class User extends Test {
 		campaignGenreSelect = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenreSelect")));
 		textArea = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("textArea")));
 		iagree = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("iagree")));
-//		campaignPublish = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignPublish")));
-
 		
-		ACTION.writeln("Start Campaign ");
+		ACTION.writeln("Start Campaign: '" + name + "'");
 		flow.setDriver(driver);
 		WebDriverWait wait = new WebDriverWait(driver, 50);
 		
@@ -318,13 +388,14 @@ public class User extends Test {
 //			campaignSong.set(new File (Accesses.getPathto().get("files") + "abba__the_day_before_you_came.mp3").getAbsolutePath());
 			campaignSong.set(new File (Accesses.getPathto().get("files") + "chillingmusic.wav").getAbsolutePath());
 			try {
-				wait.until( ExpectedConditions.textToBe(By.cssSelector("div.audio > div > div.slider__max"), "00:27") );
+				wait.until( ExpectedConditions.textToBe(By.cssSelector("app-audio > div > app-slider > div.max"), "00:27") );
 				PASSED.writeln("Audio has been uploaded");
 			} catch (TimeoutException e1) {
-				FAILED.writeln("Problem with uploading audio. Timeout 50 sec.");
+				flow.makeErrorScreenshot();
+				FAILED.writeln("Problem with uploading audio. Timeout 50 sec. " + driver.findElement(By.cssSelector("app-audio > div > app-slider > div.max")).getText() );
 			}
 			
-			campaignName.set(Configuration.getPatterns().get(1));
+			campaignName.set(name);
 			campaignArtist.set("ABBA");
 			campaignGenre.set("Pop");
 			campaignGenreSelect.click();
@@ -339,20 +410,20 @@ public class User extends Test {
 			
 			try {
 				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-campaign-own-edit")) ); //
-				PASSED.writeln("Next page with element 'page-campaign-own-edit' has been reached");
+				PASSED.writeln("Next page with element 'page-campaign-own-edit' was reached");
 			} catch (TimeoutException e) {
-				FAILED.writeln("Next page with element 'page-campaign-own-edit' has not been reached");
+				FAILED.writeln("Next page with element 'page-campaign-own-edit' was not reached");
 				throw new TestFailedException();
 			}
 			
 			profileBtn.click();
-			menuMyCampaign.click();
+			menuMyCampaigns.click();
 
 			try {
 				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-campaign-own-list")) ); //
-				PASSED.writeln("Next page with element 'page-campaign-own-list' has been reached");
+				PASSED.writeln("Next page with element 'page-campaign-own-list' was reached");
 			} catch (TimeoutException e) {
-				FAILED.writeln("Next page with element 'page-campaign-own-list' has not been reached");
+				FAILED.writeln("Next page with element 'page-campaign-own-list' was not reached");
 				throw new TestFailedException();
 			}
 			
@@ -364,70 +435,66 @@ public class User extends Test {
 		}
 	}
 	
-	public void buyCorites (String campaignId) {
-		
-		TextInput cardNumber = new TextInput(this.flow, By.cssSelector ("input[name=cardnumber]"));
-		TextInput expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
-		TextInput cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
-		TextInput zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
-		Element iframe = new Element(this.flow, By.cssSelector ("ngx-stripe-card iframe"));
-		
-		ACTION.writeln("Buy corites");
+	public void buyCorites (String campaignId, int quantity) {
+				
+		ACTION.writeln("Buy corites. User: '" + this.getUserFullName() + "'");
 		flow.setDriver(driver);
-		WebDriverWait wait = new WebDriverWait(driver, 5);
-
-		// Go to campaign page
-		DEBUG.writeln("Campaign URL: "+getBaseUrl() + "/explore/" + campaignId);
-		driver.get(getBaseUrl() + "/explore/" + campaignId);
-		try {
-			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-view")) );
-			PASSED.writeln("Page with element 'page-explore-view' was reached");
-		} catch (TimeoutException e) {
-			FAILED.writeln("Page with element 'page-explore-view' wasn't reached");
-			flow.makeErrorScreenshot();
-//			throw new TestFailedException();
-		}
+		WebDriverWait wait = new WebDriverWait(driver, 10);
 		
-		// Check if the campaign is active
-		if ( campaignStatus.getText().equals("ACTIVE") ) {
+		// Go to campaign page
+		navigateToCampaign(campaignId);
+
+		// Check if the campaign is active — there is "Get corites" button
+		if ( buyCoritesBtn.exists() ) {
 			PASSED.writeln("Campaign is active");
 		} else {
 			FAILED.writeln("Campaign is not active. Expected – active");
-			flow.makeErrorScreenshot();
-//			throw new TestFailedException();
+			throw new TestFailedException();
 		}
 		
 		buyCoritesBtn.click();
 		
+		slider.set(quantity); // Buy corites (percentage of rest balance)
+		flow.waitForStableLocation(By.cssSelector("div.mat-slider-thumb"), 160);
+
+		submitBtn.click();
+		
 		// Go to invest page
 		try {
 			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-invest")) );
-			PASSED.writeln("Page with element 'page-explore-invest' has been reached");
+			PASSED.writeln("Page with element 'page-explore-invest' was reached");
 		} catch (TimeoutException e) {
-			FAILED.writeln("Page with element 'page-explore-invest' has not been reached");
-			flow.makeErrorScreenshot();
-//			throw new TestFailedException();
+			FAILED.writeln("Page with element 'page-explore-invest' was not reached");
+			throw new TestFailedException();
 		}
-				
-		slider.set(100); // Buy all corites
+
+		boolean userHaveCard = anotherCardBtn.exists(); // User have creditcard
 		
-		flow.sleep(100);
-		
-		flow.makeScreenshot("A");
-		
-		boolean userHaveCard = accentBtn.exists(); // User have creditcard
-		
-		DEBUG.writeln("User have credit card: " + userHaveCard);
 		if ( userHaveCard ) 
-			accentBtn.click();
+			anotherCardBtn.click();
 		else
-			submitBtn.click();
+			newCardBtn.click();
 		
 		if ( iframe.exists() ) {
-		
-			driver.switchTo().frame(iframe.getEl());
 			
-			flow.sleep(100);
+			int i = 0;		
+			do {
+				driver.switchTo().defaultContent();
+				flow.sleep(100);
+				driver.switchTo().frame(driver.findElement(iframe.getBy()));
+			} while ( driver.findElements(By.cssSelector("div#root > form")).size() == 0 && i++ < 20 );
+			
+			try {
+				WebDriverWait waitIntoIframe = new WebDriverWait(driver, 5);
+				waitIntoIframe.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div#root > form")) );
+				PASSED.writeln("There is access to 'Stripe' iframe on the invest page");
+			} catch (TimeoutException e) {
+				FAILED.writeln("There isn't access to 'Stripe' iframe on the invest page");
+				flow.makeErrorScreenshot();
+				flow.makeErrorPageSource();
+				driver.switchTo().frame(0);
+				flow.sleep(1000);
+			}
 			
 			cardNumber.set("4242424242424242");
 			expDate.set("424");
@@ -441,53 +508,101 @@ public class User extends Test {
 				
 				if ( thankyou.exists() ) {
 				
-					driver.get(getBaseUrl() + "/explore/" + campaignId);
+					PASSED.writeln("Thankyou invest page was reached.");
 					
-					// Check if the campaign is funded
-					if ( campaignStatus.exists() && campaignStatus.getText().equals("FUNDED") ) {
-						PASSED.writeln("Campaign is funded. Campaign Id: " + campaignId);
-					} else {
-						FAILED.writeln("Campaign is '" + campaignStatus.getText() + "'. Expected – funded. Campaign Id: " + campaignId);
-						flow.makeErrorScreenshot();
-			//			throw new TestFailedException();
-					}
+					if ( quantity == 100 ) { // If it was bought 100% of corites then therefore the campaign is FUNDED
+						navigateToCampaign(campaignId);
+						
+/*						// Check if the campaign is funded
+						if ( campaignStatus.exists() && campaignStatus.getText().equals("FUNDED") ) {
+							PASSED.writeln("Campaign is funded. Campaign Id: " + campaignId);
+						} else {
+							FAILED.writeln("Campaign is '" + campaignStatus.getText() + "'. Expected – funded. Campaign Id: " + campaignId);
+							throw new TestFailedException();
+						}
+*/					}
+					
 				} else {
-					FAILED.writeln("Thankyou invest page was not reached. See screenshot: 'Error_buyCorites_1'");
+					FAILED.writeln("Thankyou invest page was not reached.");
 					flow.makeErrorScreenshot();
 				}
-			} else
+			} else {
 				accentBtn.click(); // Cancel getting corites
-			
+				exploreTab.click(); // Navigate from invest page to unblock the order immediately
+			}
 		} else {
 			FAILED.writeln("iframe for credit card information is not exist. See screenshot: 'Error_buyCorites_2'");			
 			flow.makeErrorScreenshot();
 		}
 	}
 	
-	private void checkIncorrectCard(String cardNumber) {
+	public void checkIncorrectCard(String campaignId, String card) {
 		
-		TextInput cardNumberIn = new TextInput(this.flow, By.cssSelector ("input[name=cardnumber]"));
-		TextInput expDate = new TextInput(this.flow, By.cssSelector ("input[name=exp-date]"));
-		TextInput cvc = new TextInput(this.flow, By.cssSelector ("input[name=cvc]"));
-		TextInput zip = new TextInput(this.flow, By.cssSelector ("input[name=postal]"));
+		ACTION.writeln("Buy corites with incorrect cards.");
+		flow.setDriver(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		
+		// Go to campaign page
+		navigateToCampaign(campaignId);
+		try {
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-view")) );
+			PASSED.writeln("Page with element 'page-explore-view' was reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Page with element 'page-explore-view' wasn't reached");
+			flow.makeErrorScreenshot();
+		}
+		
+		// Check if the campaign is active — there is "Get corites" button
+		if ( buyCoritesBtn.exists() ) {
+			PASSED.writeln("Campaign is active");
+		} else {
+			FAILED.writeln("Campaign is not active. Expected – active");
+			throw new TestFailedException();
+		}
+		
+		buyCoritesBtn.click();
 
 		slider.set(50); // Buy a half of corites
+		flow.waitForStableLocation(By.cssSelector("div.mat-slider-thumb"), 160);
 		
-		flow.sleep(100);
-		
-		boolean userHaveCard = accentBtn.exists(); // User have creditcard
-		
-		if ( userHaveCard ) // The condition makes the flow to follow by the steps to use a card number even in case the card number is saved 
-			accentBtn.click();
+		submitBtn.click();
+		// Go to invest page
+		try {
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-invest")) );
+			PASSED.writeln("Page with element 'page-explore-invest' was reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Page with element 'page-explore-invest' was not reached");
+			throw new TestFailedException();
+		}
+
+		boolean userHaveCard = anotherCardBtn.exists(); // User have creditcard	
+	
+		if ( userHaveCard ) 
+			anotherCardBtn.click();
 		else
-			submitBtn.click();
+			newCardBtn.click();
 		
 		if ( iframe.exists() ) {
-			driver.switchTo().frame(iframe.getEl());
 			
-			flow.sleep(200);
+			int i = 0;		
+			do {
+				driver.switchTo().defaultContent();
+				flow.sleep(100);
+				driver.switchTo().frame(driver.findElement(iframe.getBy()));
+			} while ( driver.findElements(By.cssSelector("div#root > form")).size() == 0 && i++ < 20 );
 			
-			cardNumberIn.set(cardNumber);
+			try {
+				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div#root > form")) );
+				PASSED.writeln("There is access to 'Stripe' iframe on the invest page");
+			} catch (TimeoutException e) {
+				FAILED.writeln("There isn't access to 'Stripe' iframe on the invest page");
+				flow.makeErrorScreenshot();
+				flow.makeErrorPageSource();
+				driver.switchTo().frame(0);
+				flow.sleep(1000);
+			}
+			
+			cardNumber.set(card);
 			expDate.set("424");
 			cvc.set("242");
 			zip.set("42424");
@@ -497,9 +612,9 @@ public class User extends Test {
 			driver.switchTo().defaultContent();
 			
 			try {
-				PASSED.writeln("Incorrect card '" + cardNumber + "' was declined with message: '" + matError.getText() + "'");
+				PASSED.writeln("Incorrect card '" + card + "' was declined with message: '" + matError.getText() + "'");
 			} catch (TimeoutException e) {
-				FAILED.writeln("Incorrect card '" + cardNumber + "' was not declined");
+				FAILED.writeln("Incorrect card '" + card + "' was not declined");
 				flow.makeErrorScreenshot();
 			}
 		} else {
@@ -507,50 +622,9 @@ public class User extends Test {
 			flow.makeErrorScreenshot();
 		}
 		accentBtn.click(); // Cancel getting corites
+		exploreTab.click(); // Navigate from invest page to unblock the order immediately
 	}
 	
-	public void buyCoritesIncorrectCard (String campaignId) { // String cardNumber
-		
-		ACTION.writeln("Buy corites with incorrect cards.");
-		flow.setDriver(driver);
-		WebDriverWait wait = new WebDriverWait(driver, 5);
-		
-		// Go to campaign page
-		driver.get(getBaseUrl() + "/explore/" + campaignId);
-		try {
-			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-view")) );
-			PASSED.writeln("Page with element 'page-explore-view' was reached");
-		} catch (TimeoutException e) {
-			FAILED.writeln("Page with element 'page-explore-view' wasn't reached");
-			flow.makeErrorScreenshot();
-		}
-		
-		// Check if the campaign is active
-		if ( campaignStatus.getText().equals("ACTIVE") ) {
-			PASSED.writeln("Campaign is active");
-		} else {
-			FAILED.writeln("Campaign is not active. Expected – active");
-			flow.makeErrorScreenshot();
-		}
-		
-		buyCoritesBtn.click();
-		
-		// Go to invest page
-		try {
-			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-invest")) );
-			PASSED.writeln("Page with element 'page-explore-invest' was reached");
-		} catch (TimeoutException e) {
-			FAILED.writeln("Page with element 'page-explore-invest' wasn't reached");
-			flow.makeErrorScreenshot();
-		}
-		checkIncorrectCard("4242424242424242"); // Проходит Ok
-		checkIncorrectCard("4242424242424241"); // Не проходит Ok
-		checkIncorrectCard("4000000000000119"); // Проходит, а не должно
-		checkIncorrectCard("4000000000000069"); // Проходит, а не должно
-		checkIncorrectCard("4000000000000127"); // Проходит, а не должно
-		checkIncorrectCard("4242424242424241"); // Не проходит Ok
-	}
-
 	public void fillReleaseInfo(String campaignId) {
 		
  		TextInput songName = new TextInput(this.flow, By.cssSelector (Configuration.getCsss().get("releaseinfopage").get("songName")));
@@ -593,10 +667,12 @@ public class User extends Test {
 		country.click();
 		submitBtn.click();
 				
-//		((JavascriptExecutor)driver).executeScript("scroll(0,400)");
+		((JavascriptExecutor)driver).executeScript("scroll(0,-10)");
 	
 	}
 	public void makeReadyToRelease(String campaignId) {
+		
+		ACTION.writeln("Make campaing #" + campaignId + " 'Ready to release' by user: '" + this.getUserFullName() + "'" );
 		flow.setDriver(driver);
  
 		try {
@@ -604,10 +680,9 @@ public class User extends Test {
 			WebDriverWait wait = new WebDriverWait(driver, 5);
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-campaign-own-release")));
 			submitBtn.click();
-			PASSED.writeln("Campaign #" + campaignId + " was made 'Ready to release by user '"+ this.getUserFullName() + "'");
+			PASSED.writeln("Campaign #" + campaignId + " was made 'Ready to release' by user '"+ this.getUserFullName() + "'");
 		} catch (TestFailedException | TimeoutException e) {
 			FAILED.writeln("User '" + this.getUserFullName() +  "' can't make a campaign as 'Ready to release'. Campaign #" + campaignId );
-			flow.makeErrorScreenshot();
 			throw new TestFailedException();
 		}
 	}
@@ -620,16 +695,14 @@ public class User extends Test {
 				this.getUserEmail(),					// to
 				Configuration.getCsss().get("confirmlinks").get("declined") // confirm link in the letter
 			));
-//			flow.sleep(1000);
-//			flow.checkHtmlHash(); // Эту проверку стоит убрать из-за нестабильности
+
 			WebDriverWait wait = new WebDriverWait(driver, 5);
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-campaign-own-edit")));
 			
 		} catch (TestFailedException | InterruptedException | TimeoutException e) {
 			FAILED.writeln("Problem with receiving an email with campaign declining message. User email: " + this.getUserEmail() );
 			throw new TestFailedException();
-		}
-		
+		}	
 	}
 
 	public void checkEmailLink(String linkCssSelector, String targetPageElementCssSelector) {
@@ -647,9 +720,79 @@ public class User extends Test {
 			PASSED.writeln("Target page by the email link was reached. Title: " + driver.getTitle() + ". Current URL: " + driver.getCurrentUrl() + ". Css selector: " + targetPageElementCssSelector );
 			
 		} catch (TestFailedException | InterruptedException | TimeoutException e) {
-			FAILED.writeln("Problem with receiving an email with campaign declining message. User email: " + this.getUserEmail() );
+			FAILED.writeln("Problem with receiving an email or navigating to the target page by the email link. User email: " + this.getUserEmail() );
 			throw new TestFailedException();
 		}		
 	}
+
+	public void checkPortfolioList(String campaignName) {
+		ACTION.writeln("Check portfolio list for Campaign name: '" + campaignName + "'");
+		flow.setDriver(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		
+		try {
+			wait.until(ExpectedConditions.presenceOfElementLocated( portfolioPageBy ));
+		} catch (TimeoutException e) {
+			FAILED.writeln("Portfolio page is required. " + portfolioPageBy + " Use navigateToPortfolio() before.");
+			throw new TestFailedException();			
+		}
+		
+		try {
+			wait.until(ExpectedConditions.presenceOfElementLocated( releasedCampaignName.getBy() ));
+			if (campaignName.equals( releasedCampaignName.getText() ) ) 
+				PASSED.writeln("Portfolio list of user '" + this.userFullName + "' contains a campaign with name '" + campaignName + "'" );
+			else {
+				FAILED.writeln("Portfolio list of user '" + this.userFullName + "' is wrong");
+				flow.makeErrorScreenshot();
+			}
+		} catch (TestFailedException | TimeoutException e) {
+			FAILED.writeln("Portfolio list of user '" + this.userFullName + "' is wrong");
+			throw new TestFailedException();			
+		}		
+
+	}
+
+	public void checkMyCorites(int myCorites) {
+		ACTION.writeln("Amount of corite of a released campaign");
+		flow.setDriver(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+		
+		try {
+			wait.until(ExpectedConditions.presenceOfElementLocated( portfolioPageBy ));
+		} catch (TimeoutException e) {
+			FAILED.writeln("Portfolio page is required. " + portfolioPageBy + " Use navigateToPortfolio() before.");
+			throw new TestFailedException();			
+		}
+		
+		try {
+			wait.until(ExpectedConditions.presenceOfElementLocated( releasedMyCorites.getBy() ));
+			int realMyCorites = Integer.parseInt( releasedMyCorites.getText() );
+			if ( realMyCorites == myCorites ) 
+				PASSED.writeln("Amount of corite is expected: " + realMyCorites + ". User: '" + this.userFullName + "'");
+			else
+				FAILED.writeln("Amount of corite of a released campaign is unexpected: " + realMyCorites + " Expected: " + myCorites + ". User: '" + this.userFullName + "'");
+		} catch (TestFailedException | TimeoutException e) {
+			FAILED.writeln("Portfolio list of user '" + this.userFullName + "' is wrong");
+			throw new TestFailedException();			
+		}
+	}
+	
+    public void checkCampaignInList(String campaignId) {
+		ACTION.writeln("Check if there is campaign #" + campaignId + " in Explore list");
+    	
+    	flow.setDriver(driver);
+    	navigateToExplore();
+    	
+		String cssS = Configuration.getCsss().get("explorepage").get("teaser").replace("{id}", campaignId);
+
+    	try {
+    		WebDriverWait wait = new WebDriverWait(driver, 10);
+			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector(cssS)) );
+    		PASSED.writeln("There is campaign #" + campaignId + " on Explore list");
+	    } catch (TimeoutException e) {
+			FAILED.writeln("There isn't campaign #" + campaignId + " on Explore list");
+			flow.makeErrorScreenshot();    	
+	    }
+    }
 
 }

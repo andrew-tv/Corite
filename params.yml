@@ -7,6 +7,18 @@ browser:
 dimension:
     width: 375
     hight: 667
+    
+browsers:
+    IPhone:
+        type: CHROME_HEADLESS
+        file: "./chromedriver"
+        width: 375
+        hight: 667
+    DescTop:
+        type: CHROME_HEADLESS
+        file: "./chromedriver"
+        width: 1200
+        hight: 800
 
 csss:
     confirmlinks:
@@ -50,12 +62,16 @@ csss:
        userNameTxt: "a[routerlink='/profile']"
        profileBtn: ".button.mat-icon-button"
        menuAdmin: "a.mat-list-link[href='https://admin.dev.corite.com/']"
-       menuMyCampaign: "a.mat-list-link[href='/my-campaigns']"
+       menuMyCampaigns: "a.mat-list-link[href='/my-campaigns']"
+       menuPortfolio: "a.mat-list-link[href='/portfolio']"
        menuLogoutBtn: "button.mat-list-link"
-       startCampaignTab: "a.mat-tab-link:nth-child(2)"
-       firstCampaignInList: "campaign-explore-teaser"
-    explorecappaignpage:
-       buyCoritesBtn: "a[routerlink=invest]"
+       startCampaignTab: "a[data-e2e=tab-start-campaign]"
+       exploreTab: "a[data-e2e=tab-explore]"
+       teaser: "explore-teaser[data-e2e=campaign-{id}]"
+       teaserCampaign: "explore-teaser[data-e2e=campaign-{id}] .title>a"
+    portfoliopage:
+       releasedCampaignName: "h2.title"
+       releasedMyCorites: "article div.value > app-corites > div"
     startcampaignpage:
        campaignImage: "campaign-group-own-image input"
        campaignSong: "campaign-group-own-song input"
@@ -66,26 +82,28 @@ csss:
        campaignValue: "mat-slider"
        textArea: "textarea"
        iagree: ".mat-checkbox-inner-container"
-       #campaignPublish: ".mat-flat-button.mat-primary"
     moderationpage:   
        acceptedModeration: "#campaign_moderationStatus_2"
        saveChangesModeration: "button.action-save"
+       campaignModerationComment: "#campaign_moderationComment"
     investpage:
        campaignStatus: "campaign-status"
        slider: "mat-slider"
-       #nextBtn: ".mat-flat-button.mat-primary"
-       buyCoritesBtn: "a[routerlink=invest]"
-       #accentBtn: ".mat-flat-button.mat-accent"
-       #pledgeBtn: ".mat-flat-button.mat-primary"
-       thankyou: "campaign-invest-thankyou"
+       anotherCardBtn: "span.change"
+       newCardBtn: ".is-empty>div"
+       thankyou: "campaign-invest-thanks"
+       buyCoritesBtn: "button.mat-flat-button.mat-primary"
     adminpage:
        searchQuery: "input[name=query]" 
        searchBtn: "button[type=submit].btn"
        dropdownMenuBtn: "td div button.btn.dropdown-toggle"
-       deleteUserBtn: "a.action-delete"
-       confirmDeleteUserBtn: "#modal-delete-button"
-       searshResultsNumber: "h1.title > strong"
+       deleteItemBtn: "a.action-delete"
+       confirmDeleteItemBtn: "#modal-delete-button"
+       searchResults: "h1.title"
        detectedItem: "tr[data-id]"
+       allCampaignsMnu: "a[data-e2e='menu.campaign.all']"
+       allOrdersMnu: "a[data-e2e='menu.order.all']"
+       allUsersMnu: "a[data-e2e='menu.user.all']"
     releaseinfopage:
        songName: "input[name='campaign[release][songName]']"
        cover: "app-file-upload div.item input"
@@ -100,9 +118,11 @@ csss:
        countries: "div.mat-select-value"
        country: "#mat-option-83"
        date: "input[min]"
-       #releaseBtn: ".mat-flat-button.mat-primary"
-
+ 
 flowsss:
+    befor_testing:
+    after_testing:
+    
     loginlogout:
 
     registerwithemail:
@@ -114,12 +134,12 @@ flowsss:
         
     releasecampaign:
       - csss: "page-campaign-own-edit"
-        hash: "-181239646"
+        hash: "6"
     
     startcampaign:
 #0 
       - csss: "explore-teaser" # css selector to check hash of its innerhtml
-        hash: "-14973616" # hashcode of the element's innerHTML
+        hash: "6" # hashcode of the element's innerHTML
 #1
       - csss: "page-explore-view"
         hash: "1"
@@ -131,7 +151,9 @@ flowsss:
     
 patterns:
 #  id: pattern
-     1: Eagle
+     1: Temporary19234 Release-Campaign
+     2: Temporary19234 Start-Campaign
+     3: 355 #Campaign id for testing payment with incorrect cards. The campaign will be failed each 30 days. So we need to create new one manually. 
 
 logger:
     debug: true
@@ -141,10 +163,10 @@ logger:
     warning: true
     failed: true
 
-runtests: 
+runtests:
 #   - loginlogout
 #   - registerwithemail
-#   - startcampaign
+   - startcampaign
 #   - releaseinformation
-   - releasecampaign
-#    - incorrectcard
+#   - releasecampaign
+#   - incorrectcard

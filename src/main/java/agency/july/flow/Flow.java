@@ -3,15 +3,19 @@ package agency.july.flow;
 import static agency.july.logger.Logevent.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import agency.july.config.models.Accesses;
 import agency.july.config.models.Configuration;
@@ -88,6 +92,7 @@ public class Flow implements IFlow {
 		}
 	}
 
+	@Override
 	public void makeScreenshot(String prefix) {
 		byte[] bytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
 		File screenshot = OutputType.FILE.convertFromPngBytes(bytes);
@@ -126,6 +131,22 @@ public class Flow implements IFlow {
 		}
 	}	
 
+	public void makeErrorPageSource() { 
+	    StackTraceElement ste = Thread.currentThread().getStackTrace()[2]; // 2 - уровень отката по стеку вызовов функций
+		String source = driver.getPageSource();
+
+		try (PrintWriter out = new PrintWriter( this.pathToScreenshots
+				+ flowName + "/"
+				+ "err_" + this.currentError + "_"
+		        + ste.getClassName() + "_"
+		        + ste.getMethodName() + "_" 
+		        + ste.getLineNumber() + ".html" )) {
+		    out.println(source);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}	
 
 	@Override
 	public int getScreenshotHash() {
@@ -183,6 +204,41 @@ public class Flow implements IFlow {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public void waitForStableLocation(By by, int firstWait) {
+//		System.out.println(">> " + by);
+		waitForStableLocation(driver.findElement(by), firstWait);
+	}
+	
+	@Override
+	public void waitForStableLocation(WebElement el, int firstWait) {
+		int a = firstWait;
+		int b = a/2;
+		int c;
+		Point loc1;
+		Point loc2 = el.getLocation();
+		sleep(a);
+		Point loc3 = el.getLocation();
+		
+		int i = 0;
+		do {
+			sleep(b);
+//			System.out.println(">>> " + i + " >>> b=" + b);
+			loc1 = loc2;
+			loc2 = loc3;
+			loc3 = el.getLocation();
+			c = b;
+			b += a;
+			a = c;
+		} while ( (( loc1.getX() != loc2.getX() )
+				|| ( loc2.getX() != loc3.getX() )
+				|| ( loc1.getY() != loc2.getY() )
+				|| ( loc2.getY() != loc3.getY() ))
+				&& (++i < 10) );
+		if ( i == 10 )
+			WARNING.writeln("WebElement location isn't stable. WebElement: " + el.toString() );
 	}
 	
 }

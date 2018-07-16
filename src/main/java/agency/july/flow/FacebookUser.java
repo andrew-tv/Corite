@@ -35,6 +35,7 @@ public class FacebookUser extends User {
 		Set<String> beforeWinHandles = driver.getWindowHandles();
 		beforeWinHandles.forEach(System.out::println);
 
+		flow.sleep(1000);
 		facebookBtn.click();
 		
 		flow.sleep(1000);

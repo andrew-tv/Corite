@@ -12,8 +12,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import agency.july.config.models.Accesses;
 import agency.july.config.models.Configuration;
@@ -25,13 +23,13 @@ public abstract class Test {
     protected WebDriver driver;
     protected Flow flow;
     protected int defaultImplicitly = 10;
-	
+    
 	public Test ( Flow flow ) {
     	setDriver( Configuration.getBrowser() );
     	Dimension dim = new Dimension(Configuration.getDimension().get("width"), Configuration.getDimension().get("hight"));
     	this.driver.manage().window().setSize( dim );
-    	this.driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-    	this.driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+    	this.driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+    	this.driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
     	this.flow = flow;
     }
     
@@ -58,10 +56,10 @@ public abstract class Test {
 	
 	    case CHROME_HEADLESS : 
 	    	System.setProperty("webdriver.chrome.driver", "./chromedriver");
-	    	ChromeOptions chromeOoptions = new ChromeOptions();
-	    	chromeOoptions.addArguments("headless");
-	    	chromeOoptions.addArguments("silent");  // This don't work
-	    	this.driver = new ChromeDriver(chromeOoptions);
+	    	ChromeOptions chromeOptions = new ChromeOptions();
+	    	chromeOptions.addArguments("headless");
+	    	chromeOptions.addArguments("silent");  // This don't work
+	    	this.driver = new ChromeDriver(chromeOptions);
 		break;
 		
 	    default:
@@ -77,10 +75,6 @@ public abstract class Test {
     	driver.get(Accesses.getUrls().get("base"));
     }
     
-	public void gotoExplorePage() {
-		driver.get( getBaseUrl() + "/explore" );
-	}
-	    
 	public void checkFormFillingError(boolean throwExeption) {
 		
     	this.driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
@@ -100,24 +94,8 @@ public abstract class Test {
 		
     	this.driver.manage().timeouts().implicitlyWait(this.defaultImplicitly, TimeUnit.SECONDS);
 	}
-    
-    public void checkFirstCampaignInList() {
 
-		WebDriverWait wait = new WebDriverWait(driver, 10);
-    	
-    	flow.setDriver(driver);
-    	gotoExplorePage();
-		wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("page-explore-list")) );
-
-    	if ( flow.checkHtmlHash() ) 
-    		PASSED.writeln("The first campaign in the list is checked after moderation");
-    	else {
-			FAILED.writeln("The first campaign in the list or its hash is wrong after moderation");
-			flow.makeErrorScreenshot();
-    	}
-    }
-    
-    public void teardown () {
+	public void teardown () {
     	driver.quit();
     }
     

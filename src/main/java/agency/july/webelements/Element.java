@@ -1,7 +1,10 @@
 package agency.july.webelements;
 
+import static agency.july.logger.Logevent.*;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -15,8 +18,7 @@ public class Element {
 	protected By bytoWait;
 	protected WebElement el;
 	
-	protected static int dutycycle = 500;
-	protected static int repetitions = 16;
+	protected int firstWait = 80;
 	
 	public Element (IFlow parentFlow, By by) {
 		this.parentFlow = parentFlow;
@@ -24,12 +26,10 @@ public class Element {
 		this.bytoWait = null;
 	}
 	
-/*	public Element (IFlow parentFlow, By by, By bytoWait) {
-		this.parentFlow = parentFlow;
-		this.by = by;
-		this.bytoWait = bytoWait;
+	public void setFirstWait(int firstWait) {
+		this.firstWait = firstWait;
 	}
-*/	
+	
 	public WebElement getEl() {
 		refresh();
 		return el;
@@ -44,10 +44,13 @@ public class Element {
 		return el.getAttribute("innerHTML").replaceAll("\\d+|src=.+?\\\"", "").hashCode();
 	}
 
-	void refresh () {
+	protected void refresh () {
 		WebDriverWait wait = new WebDriverWait(parentFlow.getDriver(), 5);
 		wait.until(ExpectedConditions.presenceOfElementLocated(by));
+		
+		parentFlow.waitForStableLocation(by, this.firstWait);
 		el = parentFlow.getDriver().findElement(by);
+		
 	}
 	
 	public boolean exists() {
@@ -72,21 +75,16 @@ public class Element {
 		WebDriverWait wait = new WebDriverWait(parentFlow.getDriver(), 5);
 		if ( this.bytoWait != null ) parentFlow.waitForHtmlHash(this.bytoWait);
 
-		refresh();
-		
 		wait.until( ExpectedConditions.elementToBeClickable(by) );
+		
+		refresh();
 		this.el.click();
 		
 //		if ( this.bytoWait != null ) parentFlow.incSlideNumber();				
 	}
-/*
-	public boolean checkAttr(String attr, String value) {
-//		refresh();
-		return value.equals( this.el.getAttribute(attr) );
-	}
-*/
+
 	public String getAttr(String attr) {
 		return getEl().getAttribute(attr);
 	}
-	
+
 }

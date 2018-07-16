@@ -38,6 +38,7 @@ public class GoogleUser extends User {
 		Set<String> beforeWinHandles = driver.getWindowHandles();
 		beforeWinHandles.forEach(System.out::println);
 
+		flow.sleep(1000);
 		googleBtn.click();
 		
 		flow.sleep(1000);
