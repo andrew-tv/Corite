@@ -2,11 +2,16 @@ package agency.july.testapp;
 
 import static agency.july.logger.Logevent.*;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.yaml.snakeyaml.Yaml;
@@ -39,8 +44,14 @@ public class App {
 	    Admin admin = null;
 	    Admin root = null;
 		try {
-			config = yaml.loadAs( new FileInputStream (new File("./params.yml")), Configuration.class );
-			accesses = yaml.loadAs( new FileInputStream (new File("/Users/andrew/Documents/workspace2/Corite/insecure.yml")), Accesses.class );
+			
+			BufferedReader br = new BufferedReader(new FileReader(new File("./thispath.txt")));
+			String thispath = br.readLine();
+			br.close();
+	        System.out.println("thispath : " + thispath);
+			 
+			config = yaml.loadAs( new FileInputStream (new File(thispath + "params.yml")), Configuration.class );
+			accesses = yaml.loadAs( new FileInputStream (new File(thispath + "insecure.yml")), Accesses.class );
 	        System.out.println(config.toString());
 	        System.out.println(accesses.toString());
 	        
