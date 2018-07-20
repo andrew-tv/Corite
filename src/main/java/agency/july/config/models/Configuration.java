@@ -8,7 +8,6 @@ import java.util.Map;
 public final class Configuration {
 	private static Map< String, BrowserProps > browsers;
 	private static Map< String, Map< String, String > > csss;
-//	private static Map< String, List < Map < String, String > > > flowsss;
 	private static Map< Integer, String > patterns;
 	private static Map< String, Boolean > logger;
 	private static List< String > runtests;
@@ -29,14 +28,6 @@ public final class Configuration {
 		Configuration.csss = csss;
 	}
 	
-/*	public static Map<String, List<Map<String, String>>> getFlowsss() {
-		return flowsss;
-	}
-
-	public void setFlowsss(Map<String, List<Map<String, String>>> flowsss) {
-		Configuration.flowsss = flowsss;
-	}
-*/
 	public static Map< Integer, String > getPatterns() {
         return patterns;
     }
@@ -66,7 +57,6 @@ public final class Configuration {
         return new StringBuilder()
             .append( format( "Browsers: %s\n", browsers ) )
             .append( format( "CSS selectors: %s\n", csss ) )
-//            .append( format( "Flowsss: %s\n", flowsss ) )
             .append( format( "Patterns: %s\n", patterns ) )
             .append( format( "Logger: %s\n", logger ) )
             .append( format( "RunningTests: %s\n", runtests ) )

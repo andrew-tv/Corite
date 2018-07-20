@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
@@ -18,24 +16,18 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import agency.july.config.models.Accesses;
-//import agency.july.config.models.Configuration;
 
 public class Flow implements IFlow {
 	
 	private WebDriver driver;
 	private String flowName;
 	private String pathToScreenshots;
-//	private List< Map < String, String > > flowMap;
 	private int currentSlideNumber = 0;
 	private int currentError = 0;
-	
-//	private int dutycycle = 500;
-//	private int repetitions = 16;
 	
 	public Flow (String flowName) {
 		this.flowName = flowName;
 		this.pathToScreenshots = Accesses.getPathto().get("screenshots")/* + Configuration.getBrowser().toString() + "/"*/;
-//		this.flowMap = Configuration.getFlowsss().get(this.flowName);
 	}
 	
 	public String getFlowName() {

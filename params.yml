@@ -9,7 +9,7 @@ browsers:
     DescTop:
         type: CHROME_HEADLESS
         file: "./chromedriver"
-        width: 1200
+        width: 1600
         hight: 800
 
 csss:
@@ -53,10 +53,12 @@ csss:
        loginBtn: "a[routerlink='/user/login']"
        userNameTxt: "a[routerlink='/profile']"
        profileBtn: ".button.mat-icon-button"
-       menuAdmin: "a.mat-list-link[href='https://admin.dev.corite.com/']"
-       menuMyCampaigns: "a.mat-list-link[href='/my-campaigns']"
-       menuPortfolio: "a.mat-list-link[href='/portfolio']"
-       menuLogoutBtn: "button.mat-list-link"
+       menuAdministration: "a[data-e2e='administration']"
+       menuMyCampaigns: "a[data-e2e='my-campaigns']"
+       menuPortfolio: "a[data-e2e='portfolio']"
+       menuProfile: "a[data-e2e='profile']"
+       menuPayouts: "a[data-e2e='payouts']"
+       menuLogoutBtn: "button[data-e2e='logout']"
        startCampaignTab: "a[data-e2e=tab-start-campaign]"
        exploreTab: "a[data-e2e=tab-explore]"
        teaser: "explore-teaser[data-e2e=campaign-{id}]"
@@ -110,41 +112,11 @@ csss:
        countries: "div.mat-select-value"
        country: "#mat-option-83"
        date: "input[min]"
- 
-#flowsss:
-#    befor_testing:
-#    after_testing:
-    
-#    loginlogout:
-
-#    registerwithemail:
-    
-#    releaseinformation:
-#0 Page after cliking on link in campaign declining email message. Campaign Id: 295
-#      - csss: "page-campaign-own-edit"
-#        hash: "-181239646" #"593831657"
-        
-#    releasecampaign:
-#      - csss: "page-campaign-own-edit"
-#        hash: "6"
-    
-#    startcampaign:
-#0 
-#      - csss: "explore-teaser" # css selector to check hash of its innerhtml
-#        hash: "6" # hashcode of the element's innerHTML
-#1
-#      - csss: "page-explore-view"
-#        hash: "1"
-#2
-#      - csss: "page-explore-view"
-#        hash: "2"
-        
-#    incorrectcard:
     
 patterns:
 #  id: pattern
-     1: Temporary19234 Release-Campaign
-     2: Temporary19234 Start-Campaign
+     1: Temporary19235 Release-Campaign
+     2: Temporary19235 Start-Campaign
      3: 355 #Campaign id for testing payment with incorrect cards. The campaign will be failed each 30 days. So we need to create new one manually. 
 
 logger:
@@ -156,9 +128,10 @@ logger:
     failed: true
 
 runtests:
-   - loginlogout
+#   - loginlogout
 #   - registerwithemail
 #   - startcampaign
 #   - releaseinformation
    - releasecampaign
 #   - incorrectcard
+#   - payouts

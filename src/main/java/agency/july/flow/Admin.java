@@ -24,7 +24,7 @@ public class Admin extends User {
 	private final String editUser43 = baseurl + "/?entity=User&action=edit&id=43";
 
 	// Explore page
-	private Element menuAdmin;
+	private Element menuAdministration;
 	
 	// Admin page
 	private TextInput searchQuery;	
@@ -47,8 +47,8 @@ public class Admin extends User {
 		super(flow, props);
 	    
 		// Explore page	    
-	    menuAdmin = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuAdmin")));
-	    menuAdmin.setFirstWait(160);
+	    menuAdministration = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuAdministration")));
+	    menuAdministration.setFirstWait(160);
 		// Admin page	    
 		searchQuery = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("searchQuery")));	
 		searchBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("searchBtn")));	
@@ -145,20 +145,21 @@ public class Admin extends User {
 
 	public void navigateToAdminPage() {
 		
-		ACTION.writeln("Goto admin page : " + this.userEmail);		
+		ACTION.writeln("Navigate to admin page : " + this.userEmail);		
 		flow.setDriver(driver);
 
 		WebDriverWait wait = new WebDriverWait(driver, 5);
 		
 		try {
 			profileBtn.click();
-			menuAdmin.click();
+			menuAdministration.click();
 			// Change window
 			for( String winHandle : driver.getWindowHandles() ) {
 			    driver.switchTo().window(winHandle);
 			}
 			
-	        driver.manage().window().setSize(new Dimension(1300, 800));
+	    	Dimension dim = new Dimension( 1200, 800 );
+	    	driver.manage().window().setSize( dim );
 			wait.until(ExpectedConditions.titleContains("Dashboard"));
 			
 		} catch (TestFailedException e) {
@@ -169,18 +170,64 @@ public class Admin extends User {
 		}
 	}
 	
+	public void navigateToCampaign(String campaignId) {
+		
+		ACTION.writeln("Admin navigates to campaign #" + campaignId);		
+		flow.setDriver(driver);
+		
+		String cssS = "tr[data-id='{id}']>td[data-label='Title']>a".replace("{id}", campaignId);
+		Element campaign = new Element(this.flow, By.cssSelector (cssS));
+		
+		allCampaignsMnu.click();
+		campaign.click();
+	}
+	
+	public void sendMoney(String campaignId, float amount) {
+		
+		ACTION.writeln("Send money to creator for campaign: #" + campaignId);		
+		flow.setDriver(driver);
+		
+		navigateToCampaign(campaignId);
+		
+		driver.findElement(By.xpath("//*[@id='main']/div[1]/ul/li[5]/a")).click();
+		flow.makeScreenshot("A");
+		
+		TextInput amountIn = new TextInput(this.flow, By.cssSelector ("input#form_amount"));
+				
+		float maxAmount = Float.parseFloat( amountIn.getAttr("value") );
+		
+		if (amount < maxAmount) {
+			amountIn.set(Float.toString(amount));
+		}
+		flow.makeScreenshot("B");
+		
+		driver.findElement(By.cssSelector("#form_save")).click();
+		flow.sleep(1000);
+		flow.makeScreenshot("C");
+		
+	}
+	
 	public void setModeratorRole43(boolean tick) {
 		ACTION.writeln("Set moderation role: " + tick);		
 		flow.setDriver(driver);
 		
-		WebDriverWait wait = new WebDriverWait(driver, 5);
-		driver.get(editUser43);
-		wait.until(ExpectedConditions.titleContains("Edit User (#43)"));
-		
-		WebElement checkboxModerator = driver.findElement(By.cssSelector("input[value='ROLE_MODERATOR']"));
-		if ( tick && checkboxModerator.getAttribute("checked") == null ) checkboxModerator.click();
-		if ( !tick && checkboxModerator.getAttribute("checked") != null ) checkboxModerator.click();
-		driver.findElement(By.cssSelector("button.action-save")).click();		
+		try {
+			
+			WebDriverWait wait = new WebDriverWait(driver, 5);
+			driver.get(editUser43);
+			wait.until(ExpectedConditions.titleContains("Edit User (#43)"));
+			
+			WebElement checkboxModerator = driver.findElement(By.cssSelector("input[value='ROLE_MODERATOR']"));
+			if ( tick && checkboxModerator.getAttribute("checked") == null ) checkboxModerator.click();
+			if ( !tick && checkboxModerator.getAttribute("checked") != null ) checkboxModerator.click();
+			driver.findElement(By.cssSelector("button.action-save")).click();		
+		} catch (TestFailedException e) {
+			throw new TestFailedException();
+		} catch (Exception e) {
+			flow.makeErrorScreenshot();
+			e.printStackTrace();
+			throw new TestFailedException();
+		}
 	}
 		
 	public void removeOrders(String campaignSearch) {

@@ -51,6 +51,8 @@ public class User /*extends Test*/ {
 	protected Element profileBtn;
 	private Element menuMyCampaigns;
 	private Element menuPortfolio;
+	private Element menuProfile;
+	private Element menuPayouts;
 	private Element menuLogoutBtn;
 	private Element userNameTxt;
 	private Element startCampaignTab;
@@ -64,6 +66,9 @@ public class User /*extends Test*/ {
 	By portfolioPageBy = By.cssSelector("page-portfolio");
 	private Element releasedCampaignName;
 	private Element releasedMyCorites;
+
+	// Payouts page
+	By payoutsPageBy = By.cssSelector("user-payout-balance");
 
 	// Invest page
 	private Slider slider;
@@ -114,6 +119,8 @@ public class User /*extends Test*/ {
 		profileBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("profileBtn")) );
 		menuMyCampaigns = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuMyCampaigns")));
 		menuPortfolio = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuPortfolio")));
+		menuProfile = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuProfile")));
+		menuPayouts = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuPayouts")));
 		menuLogoutBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("menuLogoutBtn")) );
 		userNameTxt = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("userNameTxt")) );
 		startCampaignTab = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("explorepage").get("startCampaignTab")));
@@ -267,6 +274,23 @@ public class User /*extends Test*/ {
 			PASSED.writeln("Portfolio page was reached");
 		} catch (TimeoutException e) {
 			FAILED.writeln("Portfolio page wasn't reached");
+			throw new TestFailedException();			
+		}	
+	}
+
+	public void navigateToPayouts() {
+		ACTION.writeln("Navigate to payouts balance of user: " + this.getUserFullName());
+		flow.setDriver(driver);
+		
+		profileBtn.click();
+		menuPayouts.click();
+		
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 5);
+			wait.until(ExpectedConditions.presenceOfElementLocated( payoutsPageBy ));
+			PASSED.writeln("Payouts page was reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("Payouts page wasn't reached");
 			throw new TestFailedException();			
 		}	
 	}
@@ -520,19 +544,11 @@ public class User /*extends Test*/ {
 				if ( thankyou.exists() ) {
 				
 					PASSED.writeln("Thankyou invest page was reached.");
-					
+/*					
 					if ( quantity == 100 ) { // If it was bought 100% of corites then therefore the campaign is FUNDED
 						navigateToCampaign(campaignId);
-						
-/*						// Check if the campaign is funded
-						if ( campaignStatus.exists() && campaignStatus.getText().equals("FUNDED") ) {
-							PASSED.writeln("Campaign is funded. Campaign Id: " + campaignId);
-						} else {
-							FAILED.writeln("Campaign is '" + campaignStatus.getText() + "'. Expected – funded. Campaign Id: " + campaignId);
-							throw new TestFailedException();
-						}
-*/					}
-					
+					}
+*/					
 				} else {
 					FAILED.writeln("Thankyou invest page was not reached.");
 					flow.makeErrorScreenshot();
@@ -764,7 +780,7 @@ public class User /*extends Test*/ {
 	}
 
 	public void checkMyCorites(int myCorites) {
-		ACTION.writeln("Amount of corite of a released campaign");
+		ACTION.writeln("Checking amount of corite of a released campaign");
 		flow.setDriver(driver);
 		WebDriverWait wait = new WebDriverWait(driver, 5);
 		
@@ -777,14 +793,31 @@ public class User /*extends Test*/ {
 		
 		try {
 			wait.until(ExpectedConditions.presenceOfElementLocated( releasedMyCorites.getBy() ));
-			int realMyCorites = Integer.parseInt( releasedMyCorites.getText() );
-			if ( realMyCorites == myCorites ) 
-				PASSED.writeln("Amount of corite is expected: " + realMyCorites + ". User: '" + this.userFullName + "'");
-			else
-				FAILED.writeln("Amount of corite of a released campaign is unexpected: " + realMyCorites + " Expected: " + myCorites + ". User: '" + this.userFullName + "'");
+			int actualMyCorites = Integer.parseInt( releasedMyCorites.getText() );
+			if ( actualMyCorites == myCorites ) 
+				PASSED.writeln("Amount of corite is expected: " + actualMyCorites + ". User: '" + this.userFullName + "'");
+			else {
+				FAILED.writeln("Amount of corite of a released campaign is unexpected: " + actualMyCorites + " Expected: " + myCorites + ". User: '" + this.userFullName + "'");
+				flow.makeErrorScreenshot();
+			}
 		} catch (TestFailedException | TimeoutException e) {
 			FAILED.writeln("Portfolio list of user '" + this.userFullName + "' is wrong");
 			throw new TestFailedException();			
+		}
+	}
+	
+	public void checkPayoutsBalance(float balance) {
+		ACTION.writeln("Checking payouts balance");
+		flow.setDriver(driver);
+		
+		navigateToPayouts();
+		
+		float actualBalance = Float.parseFloat( driver.findElement(payoutsPageBy).getText().replaceAll("[^\\d\\.]", "") );
+		if (balance == actualBalance) 
+			PASSED.writeln("Payouts balance is expected: " + actualBalance + ". User: '" + this.userFullName + "'");
+		else {
+			FAILED.writeln("Payouts balance is unexpected: " + actualBalance + " Expected: " + balance + ". User: '" + this.userFullName + "'");			
+			flow.makeErrorScreenshot();
 		}
 	}
 	

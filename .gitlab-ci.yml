@@ -1,0 +1,6 @@
+before_script:
+  - mvn clean package
+
+coritest:
+  script:
+    - mvn exec:java -Dexec.mainClass="agency.july.testapp.App" -Dexec.cleanupDaemonThreads=false

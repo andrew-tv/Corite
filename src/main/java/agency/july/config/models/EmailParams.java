@@ -62,13 +62,13 @@ public class EmailParams {
     @Override
     public String toString() {
         return new StringBuilder()
-                .append( format( "Protocol: %s\n", protocol ) )
-                .append( format( "Store: %s\n", store ) )
-                .append( format( "Connect: %s\n", connect ) )
-                .append( format( "Folder: %s\n", folder ) )
-                .append( format( "Account: %s\n", account ) )
-                .append( format( "Password: %s\n", password ) )
-                .toString();
+            .append( format( "Protocol: %s\n", protocol ) )
+            .append( format( "Store: %s\n", store ) )
+            .append( format( "Connect: %s\n", connect ) )
+            .append( format( "Folder: %s\n", folder ) )
+            .append( format( "Account: %s\n", account ) )
+            .append( format( "Password: %s\n", "password" ) )
+            .toString();
     }
 
 }

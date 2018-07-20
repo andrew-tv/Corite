@@ -65,13 +65,15 @@ public class App {
 		    admin = new Admin( new Flow( "befor_after_testing" ), descTopBrowser ).withUser( "admin" );
 			admin.login();
 			admin.navigateToAdminPage();
-            admin.setModeratorRole43(true); // Set moderator role for admin
+//			admin.navigateToCampaign("389");
+//			admin.sendMoney("389", 100f);
+			admin.setModeratorRole43(true); // Set moderator role for admin
 		    root = new Admin( new Flow( "befor_after_testing" ), descTopBrowser ).withUser( "root" );
 		    root.login();
 		    root.navigateToAdminPage();
 		    root.removeUsers("temporary");		    
-		    root.removeOrders("Temporary19234");
-		    root.removeCampaigns("Temporary19234");
+		    root.removeOrders("Temporary19235");
+		    root.removeCampaigns("Temporary19235");
 		    
 			// Определяем потоки выполнения. Каждый тест в своем потоке
 			Thread threadLoginLogout = null;
@@ -87,6 +89,18 @@ public class App {
 			for (int i = 0; i < runningTests.size(); i++) {
 				
 				switch (runningTests.get(i)) {
+				
+					case "payouts" : 
+						Flow flow = new Flow( "payouts" );
+						User user = new User( flow, iPhone6Browser ).withUser( "campaigncreator1" );
+					try {
+						user.login();
+						user.checkPayoutsBalance(1200);
+					} catch (Exception e) {
+						user.teardown();
+					}
+						
+					break;
 				
 					case "loginlogout" : 
 				
@@ -168,7 +182,7 @@ public class App {
 					
 					case "startcampaign" : 
 						
-						threadStartcampaign = new Thread (new Runnable() {
+					threadStartcampaign = new Thread (new Runnable() {
 						public void run() {
 							
 							Flow flow = new Flow( "startcampaign" );
@@ -204,6 +218,11 @@ public class App {
 					            user.checkEmailLink("a.inform-creator-about-accept", "page-explore-view explore-full>article");
 					            user.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
 					            user.checkEmailLink( "a[data-e2e=informCreatorAboutFunded]", "page-explore-view explore-full>article" );
+					            
+					            // Checking Sending money and Payouts balance
+//								admin.navigateToCampaign(campaignId);
+//								admin.sendMoney(campaignId, 100f);
+//								user.checkPayoutsBalance(1200);
 
 							} catch (TestFailedException e) {
 								flow.makeErrorScreenshot();
@@ -227,16 +246,16 @@ public class App {
 					
 					case "releasecampaign" : 
 						
-						threadReleaseCampaign = new Thread (new Runnable() {
+					threadReleaseCampaign = new Thread (new Runnable() {
 						public void run() {
-							
+								
 							Flow flow = new Flow( "releasecampaign" );
-
+	
 							User creator = new User( flow, iPhone6Browser ).withUser( "campaigncreator1" );
 							User backer = new User( flow, iPhone6Browser ).withUser( "campaignbacker1" );
 							User backerTwo = new User( flow, iPhone6Browser ).withUser( "campaignbacker2" );
-				            Admin admin = new Admin( flow, descTopBrowser ).withUser( "admin" );
-							
+					        Admin admin = new Admin( flow, descTopBrowser ).withUser( "admin" );
+								
 							try {			
 								admin.login();
 								admin.navigateToAdminPage();
@@ -281,18 +300,18 @@ public class App {
 					            creator.checkPortfolioList( Configuration.getPatterns().get(1) );
 					            creator.checkMyCorites( 1636 );
 					            
-					            flow.makeScreenshot("Creator");
+//					            flow.makeScreenshot("Creator");
 
 					            backer.navigateToPortfolio();
 					            backer.checkPortfolioList( Configuration.getPatterns().get(1) );
 					            backer.checkMyCorites( 90 );
 
-					            flow.makeScreenshot("Backer");
+//					            flow.makeScreenshot("Backer");
 
 					            backerTwo.navigateToPortfolio();
 					            backerTwo.checkPortfolioList( Configuration.getPatterns().get(1) );
 					            backerTwo.checkMyCorites( 74 );
-					            flow.makeScreenshot("BackerTwo");
+//					            flow.makeScreenshot("BackerTwo");
 						            
 							} catch (TestFailedException e) {
 								flow.makeErrorScreenshot();
@@ -315,89 +334,89 @@ public class App {
 					break;
 					
 					case "releaseinformation" : 
-						threadReleaseinformation = new Thread (new Runnable() {
-							public void run() {
+					threadReleaseinformation = new Thread (new Runnable() {
+						public void run() {
+							
+							Flow flow = new Flow( "releaseinformation" );
+							User user = new User( flow, iPhone6Browser ).withUser( "test" );
+							Admin admin = new Admin( flow, descTopBrowser ).withUser( "admin" );
+							
+							try {			
 								
-								Flow flow = new Flow( "releaseinformation" );
-								User user = new User( flow, iPhone6Browser ).withUser( "test" );
-								Admin admin = new Admin( flow, descTopBrowser ).withUser( "admin" );
-								
-								try {			
-									
-						            // Prepare initial state
-									admin.login();
-									admin.navigateToAdminPage();
-						            admin.moderateCampaign("295", CompaignStatus.NONE);
+					            // Prepare initial state
+								admin.login();
+								admin.navigateToAdminPage();
+					            admin.moderateCampaign("295", CompaignStatus.NONE);
 
-						            // Begin test
-						            user.login();
-						            user.fillReleaseInfo("295");
-						            
-						            flow.sleep(1000); // Waiting for changing status of the campaign in database
-						            
-						            if ( admin.getCampaignStatus("295") == CompaignStatus.NEEDS_MODERATION ) 
-						            	PASSED.writeln("Release information of campaign #295 was filled in by '" + user.getUserEmail() + "'");
-						            else
-						            	throw new TestFailedException();
-						            
-						            // Restore initial state
-						            admin.moderateCampaign("295", CompaignStatus.DECLINE);
-						            
-						            user.checkDeclineEmail();
-						            
-								} catch (TestFailedException e) {
-									flow.makeErrorScreenshot();
-									FAILED.writeln("Filling in a release information of campaign #295 by '" + user.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
-								} catch (Exception e) {
-									flow.makeErrorScreenshot();
-									FAILED.writeln("Filling in a release information '" + user.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
-									e.printStackTrace();
-								} finally {
-						            INFO.writeln("Filling in a release information test finished");
-						            user.teardown();
-						            admin.teardown();
-								}
+					            // Begin test
+					            user.login();
+					            user.fillReleaseInfo("295");
+					            
+					            flow.sleep(1000); // Waiting for changing status of the campaign in database
+					            
+					            if ( admin.getCampaignStatus("295") == CompaignStatus.NEEDS_MODERATION ) 
+					            	PASSED.writeln("Release information of campaign #295 was filled in by '" + user.getUserEmail() + "'");
+					            else
+					            	throw new TestFailedException();
+					            
+					            // Restore initial state
+					            admin.moderateCampaign("295", CompaignStatus.DECLINE);
+					            
+					            user.checkDeclineEmail();
+					            
+							} catch (TestFailedException e) {
+								flow.makeErrorScreenshot();
+								FAILED.writeln("Filling in a release information of campaign #295 by '" + user.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+							} catch (Exception e) {
+								flow.makeErrorScreenshot();
+								FAILED.writeln("Filling in a release information '" + user.getUserEmail() + "' was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+								e.printStackTrace();
+							} finally {
+					            INFO.writeln("Filling in a release information test finished");
+					            user.teardown();
+					            admin.teardown();
 							}
-						});
-						threadReleaseinformation.setName("ReleaseInformation");
-						threadReleaseinformation.start();
-						break;
+						}
+					});
+					threadReleaseinformation.setName("ReleaseInformation");
+					threadReleaseinformation.start();
+					break;
 						
 					case "incorrectcard" :
-						threadIncorrectcard = new Thread (new Runnable() {
-							public void run() {
-								
-								Flow flow = new Flow( "incorrectcard" );
-								User user = new User( flow, iPhone6Browser ).withUser( "incorrectcard" );
-								
-								try {			
+					threadIncorrectcard = new Thread (new Runnable() {
+						public void run() {
+							
+							Flow flow = new Flow( "incorrectcard" );
+							User user = new User( flow, iPhone6Browser ).withUser( "incorrectcard" );
+							
+							try {			
 
-						            user.login();
-						            String campaignId = Configuration.getPatterns().get(3); // Predefined campaign
-						            user.checkIncorrectCard(campaignId, "4242424242424242"); // Проходит Ok
-						            user.checkIncorrectCard(campaignId, "4242424242424241"); // Не проходит Ok
-						            user.checkIncorrectCard(campaignId, "4000000000000119"); // Проходит, а не должно
-						            user.checkIncorrectCard(campaignId, "4000000000000069"); // Проходит, а не должно
-						            user.checkIncorrectCard(campaignId, "4000000000000127"); // Проходит, а не должно
-						            							            
-								} catch (TestFailedException e) {
-									FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
-									flow.makeErrorScreenshot();
-								} catch (Exception e) {
-									flow.makeErrorScreenshot();
-									FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
-									e.printStackTrace();
-								} finally {
-						            INFO.writeln("Test of payment with incorrect card was finished");
-						            user.teardown();
-								}
+					            user.login();
+					            String campaignId = Configuration.getPatterns().get(3); // Predefined campaign
+					            user.checkIncorrectCard(campaignId, "4242424242424242"); // Проходит Ok
+					            user.checkIncorrectCard(campaignId, "4242424242424241"); // Не проходит Ok
+					            user.checkIncorrectCard(campaignId, "4000000000000119"); // Проходит, а не должно
+					            user.checkIncorrectCard(campaignId, "4000000000000069"); // Проходит, а не должно
+					            user.checkIncorrectCard(campaignId, "4000000000000127"); // Проходит, а не должно
+					            							            
+							} catch (TestFailedException e) {
+								FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+								flow.makeErrorScreenshot();
+							} catch (Exception e) {
+								flow.makeErrorScreenshot();
+								FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+								e.printStackTrace();
+							} finally {
+					            INFO.writeln("Test of payment with incorrect card was finished");
+					            user.teardown();
 							}
-						});
-						threadIncorrectcard.setName("IncorrectCard");
-						threadIncorrectcard.start();
-						break;
-					}
+						}
+					});
+					threadIncorrectcard.setName("IncorrectCard");
+					threadIncorrectcard.start();
+					break;
 				}
+			}
 			// Ожидание выполнения всех потоков (тестов)
 			if (threadLoginLogout != null) threadLoginLogout.join();
 			if (threadRegisterWithEmail != null) threadRegisterWithEmail.join();
@@ -411,8 +430,8 @@ public class App {
             admin.setModeratorRole43(false);
             admin.teardown();
             root.removeUsers("temporary");
-		    root.removeOrders("Temporary19234");
-		    root.removeCampaigns("Temporary19234");
+		    root.removeOrders("Temporary19235");
+		    root.removeCampaigns("Temporary19235");
             root.teardown();
 
 		} catch (FileNotFoundException e1) {
@@ -439,6 +458,7 @@ public class App {
         	String time = String.format("%02d:%02d:%02d.%d", hour, minute, second, millis);
 
         	System.out.println( "Executing time (hh:mm:ss:mls): " + time);
+        	System.runFinalization();
         }	        
     }
 }

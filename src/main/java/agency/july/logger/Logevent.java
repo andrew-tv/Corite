@@ -7,7 +7,7 @@ public enum Logevent {
 		public void writeln(String msg) { // Этот метод для DEBUG переопределен так как он никогда не выводит в лог файл (только в консоль)
 			String line = Thread.currentThread().getName() + " >> " + this.prefix + msg;
 			
-			if (/*IDE_version*/true) { // Для IDE запуска без эскейп последовательностей так как эклипсовая консоль их не понимает
+			if (/*IDE_version*/false) { // Для IDE запуска без эскейп последовательностей так как эклипсовая консоль их не понимает
 				if (this.enable) this.output.println(line);
 			} else {
 				if (this.enable) this.output.println(this.color + line + "\u001B[0m");			
@@ -51,7 +51,7 @@ public enum Logevent {
 	
 	public void writeln(String msg) { // Печатает сообщение на консоль и в log-file в соответствии с настройками. (Для DEBUG переопределен)
 		String line = Thread.currentThread().getName() + " >> " + this.prefix + msg;
-		if (/*IDE_version*/true) { // Для IDE запуска без эскейп последовательностей так как эклипсовая консоль их не понимает
+		if (/*IDE_version*/false) { // Для IDE запуска без эскейп последовательностей так как эклипсовая консоль их не понимает
 			if (this.enable) this.output.println(line);
 		} else {
 			if (this.enable) this.output.println(this.color + line + "\u001B[0m");			

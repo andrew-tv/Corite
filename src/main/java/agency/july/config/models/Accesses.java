@@ -2,7 +2,6 @@ package agency.july.config.models;
 
 import static java.lang.String.format;
 
-import java.util.List;
 import java.util.Map;
 
 public class Accesses {
