@@ -11,7 +11,7 @@ public class FirefoxHeadless implements Browser {
 
 	@Override
 	public WebDriver createDriver(BrowserProps props) {
-    	System.setProperty("webdriver.gecko.driver","~/bin/geckodriver");
+    	System.setProperty("webdriver.gecko.driver", props.getFile()); //"/Users/andrew/bin/geckodriver"
     	FirefoxBinary firefoxBinary = new FirefoxBinary();
     	firefoxBinary.addCommandLineOptions("--headless");
     	FirefoxOptions firefoxOptions = new FirefoxOptions();

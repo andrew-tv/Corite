@@ -3,12 +3,12 @@
 browsers:
     IPhone6:
         type: CHROME_HEADLESS
-        file: "./chromedriver"
+        file: "/Users/andrew/bin/chromedriver"
         width: 375
         hight: 667
     DescTop:
         type: CHROME_HEADLESS
-        file: "./chromedriver"
+        file: "/Users/andrew/bin/chromedriver"
         width: 1600
         hight: 800
 
