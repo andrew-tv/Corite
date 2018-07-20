@@ -10,7 +10,7 @@ public class ChromeHeadless implements Browser {
 
 	@Override
 	public WebDriver createDriver(BrowserProps props) {
-    	System.setProperty("webdriver.chrome.driver", "./chromedriver");
+    	System.setProperty("webdriver.chrome.driver", "~/bin/chromedriver");
     	ChromeOptions chromeOptions = new ChromeOptions();
     	chromeOptions.addArguments("headless");
     	chromeOptions.addArguments("silent");  // This don't work

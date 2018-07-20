@@ -20,7 +20,7 @@ public class BrowserFactory {
 
 	    switch ( props.getType() ) {       
 	    case FIREFOX : 
-	    	System.setProperty("webdriver.gecko.driver","./geckodriver");
+	    	System.setProperty("webdriver.gecko.driver","~/bin/geckodriver");
 	    	driver = new FirefoxDriver();
 	    	break;
 	    	
@@ -29,7 +29,7 @@ public class BrowserFactory {
 	    	break;
 	    	
 	    case CHROME : 
-	    	System.setProperty("webdriver.chrome.driver", "./chromedriver");
+	    	System.setProperty("webdriver.chrome.driver", "~/bin/chromedriver");
 	    	driver = new ChromeDriver();
 	    	break;
 	
