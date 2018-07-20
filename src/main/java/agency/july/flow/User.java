@@ -870,5 +870,11 @@ public class User /*extends Test*/ {
 	public void teardown () {
     	driver.quit();
     }
+	
+    protected void finalize() throws Throwable {
+    	driver.quit();
+        System.out.printf("Web driver is getting garbage collected");
+    }
+
 
 }

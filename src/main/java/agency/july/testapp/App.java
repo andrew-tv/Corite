@@ -40,7 +40,7 @@ public class App {
 	    Admin root = null;
 		try {
 			config = yaml.loadAs( new FileInputStream (new File("./params.yml")), Configuration.class );
-			accesses = yaml.loadAs( new FileInputStream (new File("./insecure.yml")), Accesses.class );
+			accesses = yaml.loadAs( new FileInputStream (new File("/Users/andrew/Documents/workspace2/Corite/insecure.yml")), Accesses.class );
 	        System.out.println(config.toString());
 	        System.out.println(accesses.toString());
 	        
@@ -435,7 +435,7 @@ public class App {
             root.teardown();
 
 		} catch (FileNotFoundException e1) {
-			System.out.println("Could not load configuration file: ./params.yml");
+			System.out.println("Could not load a configuration file: './params.yml' or './insecure.yml'");
     		e1.printStackTrace();
         } catch (Exception e) {
     		e.printStackTrace();
@@ -458,6 +458,7 @@ public class App {
         	String time = String.format("%02d:%02d:%02d.%d", hour, minute, second, millis);
 
         	System.out.println( "Executing time (hh:mm:ss:mls): " + time);
+        	
         	System.runFinalization();
         }	        
     }
