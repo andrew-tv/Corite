@@ -64,6 +64,9 @@ public class User /*extends Test*/ {
 	
 	// Portfolio page
 	By portfolioPageBy = By.cssSelector("page-portfolio");
+	By campaignOwnList = By.cssSelector("page-campaign-own-list");
+	By campaignOwnEditor = By.cssSelector("page-campaign-own-edit");
+	
 	private Element releasedCampaignName;
 	private Element releasedMyCorites;
 
@@ -96,8 +99,17 @@ public class User /*extends Test*/ {
 	private TextInput campaignArtist;
 	private TextInput campaignGenre;
 	private Element campaignGenreSelect;
+	private Slider campaignValue;
 	private TextInput textArea;
 	private Element iagree;
+	
+	// Edit Campaign page
+	private Element cancelCampaign;
+	private Element addReleaseInformation;
+	
+	// My campaigns page
+	private Element teaserMyCampaign;
+	private Element campaignStatus;
 	
 	public User(Flow flow, BrowserProps props) {
 		this.driver = BrowserFactory.getDriver(props);
@@ -146,6 +158,9 @@ public class User /*extends Test*/ {
 		passwordNewIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordNewIn")));
 		passwordConfirmIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("passwordConfirmIn")));
 		telephoneIn = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("registerpage").get("telephoneIn")));
+		// Edit Campaign page
+		cancelCampaign = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("campaigneditpage").get("cancelCampaign")));
+		addReleaseInformation = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("campaigneditpage").get("addReleaseInformation")));
 	}
 	
 	public User withUser(String user) {
@@ -278,6 +293,41 @@ public class User /*extends Test*/ {
 		}	
 	}
 
+	public void navigateToMyCampaignsList() {
+		ACTION.writeln("Navigate to 'My campaigns' list. User: " + this.getUserFullName());
+		flow.setDriver(driver);
+		
+		profileBtn.click();
+		menuMyCampaigns.click();
+		
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 5);
+			wait.until(ExpectedConditions.presenceOfElementLocated( campaignOwnList ));
+			PASSED.writeln("My campaigns list page was reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("My campaigns list page wasn't reached");
+			throw new TestFailedException();			
+		}	
+	}
+
+	public void navigateMyCampaignEditor(String campaignId) {
+		ACTION.writeln("Navigate to campaign editor. User: " + this.getUserFullName());
+		flow.setDriver(driver);
+		
+		String cssS = Configuration.getCsss().get("mycampaignspage").get("teaserMyCampaign").replace("{id}", campaignId);
+		Element campaign = new Element(this.flow, By.cssSelector (cssS));
+		campaign.click();
+		
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, 5);
+			wait.until(ExpectedConditions.presenceOfElementLocated( campaignOwnEditor ));
+			PASSED.writeln("My campaigns list page was reached");
+		} catch (TimeoutException e) {
+			FAILED.writeln("My campaigns list page wasn't reached");
+			throw new TestFailedException();			
+		}
+	}
+
 	public void navigateToPayouts() {
 		ACTION.writeln("Navigate to payouts balance of user: " + this.getUserFullName());
 		flow.setDriver(driver);
@@ -405,6 +455,7 @@ public class User /*extends Test*/ {
 		campaignArtist = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignArtist")));
 		campaignGenre = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenre")));
 		campaignGenreSelect = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenreSelect")));
+		campaignValue = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValue")));
 		textArea = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("textArea")));
 		iagree = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("iagree")));
 		
@@ -418,8 +469,8 @@ public class User /*extends Test*/ {
 			
 			campaignImage.set(new File (Accesses.getPathto().get("files") + "Abba-007.jpg").getAbsolutePath());
 //			campaignValue.set(Keys.ARROW_RIGHT);			
-			slider.set(20);
-			
+			campaignValue.set(20);
+						
 //			campaignSong.set(new File (Accesses.getPathto().get("files") + "abba__the_day_before_you_came.mp3").getAbsolutePath());
 			campaignSong.set(new File (Accesses.getPathto().get("files") + "chillingmusic.wav").getAbsolutePath());
 			try {
@@ -867,14 +918,53 @@ public class User /*extends Test*/ {
     	this.driver.manage().timeouts().implicitlyWait(this.defaultImplicitly, TimeUnit.SECONDS);
 	}
 
+	public void cancelCampaign(String campaignId) {
+		ACTION.writeln("Canceling campaign #" + campaignId);    	
+    	flow.setDriver(driver);
+    	
+    	navigateToMyCampaignsList();
+		navigateMyCampaignEditor(campaignId);
+		cancelCampaign.click();
+		submitBtn.click();
+	}
+	
+	protected CampaignStatus getMyCampaignStatus(String campaignId) {
+    	
+    	navigateToMyCampaignsList();
+		String cssS = Configuration.getCsss().get("mycampaignspage").get("campaignStatus").replace("{id}", campaignId);
+		String campaignStatus = new Element(this.flow, By.cssSelector (cssS)).getText();
+
+		INFO.writeln("Campaign status is '" + campaignStatus + "'"); 
+		switch ( campaignStatus ) {
+			case "ACTIVE" : return CampaignStatus.ACTIVE;
+			case "FUNDED" : return CampaignStatus.FUNDED;
+			case "FAILED" : return CampaignStatus.FAILED;
+			case "RELEASED" : return CampaignStatus.RELEASED;
+			default : return CampaignStatus.UNDEFINED;
+		}
+	}
+
+	public void checkMyCampaignStatus(String campaignId, CampaignStatus status) {
+		ACTION.writeln("Check my campaign status. Campaign #" + campaignId);    	
+    	flow.setDriver(driver);
+    	
+    	CampaignStatus actualStatus = getMyCampaignStatus(campaignId);
+
+    	if ( actualStatus == status )
+    		PASSED.writeln("Campaign status is expected: '" + status + "'");
+    	else {
+    		FAILED.writeln("Unexpected Campaign status : '" + actualStatus + "'. '" + status + "' was expected");
+    		flow.makeErrorPageSource();
+    	}
+	}
+
 	public void teardown () {
     	driver.quit();
     }
 	
     protected void finalize() throws Throwable {
-    	driver.quit();
+    	teardown();
         System.out.printf("Web driver is getting garbage collected");
     }
-
 
 }

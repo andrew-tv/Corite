@@ -12,6 +12,7 @@ public class Accesses {
 	private static Map< String, String > urls;
 	private static Map< String, String > pathto;
 	private static EmailParams email;
+	private static Database DB;
 	
 	public static Map<String, String> getLogins() {
 		return logins;
@@ -61,7 +62,15 @@ public class Accesses {
 		Accesses.email = email;
 	}
 	
-    @Override
+    public static Database getDB() {
+		return DB;
+	}
+
+	public void setDB(Database DB) {
+		Accesses.DB = DB;
+	}
+
+	@Override
     public String toString() {
         return new StringBuilder()
             .append( format( "Logins: %s\n", logins ) )
@@ -70,6 +79,7 @@ public class Accesses {
             .append( format( "Urls: %s\n", urls ) )
             .append( format( "PathTo: %s\n", pathto ) )
             .append( format( "Email: %s\n", email ) )
+            .append( format( "Database: %s\n", DB ) )
             .toString();
     }
 }

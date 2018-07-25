@@ -1,4 +1,5 @@
 before_script:
+  - ./bin/corite_deploy_ci
   - mvn clean package
 
 coritest:

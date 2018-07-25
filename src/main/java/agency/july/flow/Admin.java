@@ -21,7 +21,6 @@ import agency.july.webelements.TextInput;
 public class Admin extends User {
 	
 	private final String baseurl = Accesses.getUrls().get("adminbase");
-	private final String editUser43 = baseurl + "/?entity=User&action=edit&id=43";
 
 	// Explore page
 	private Element menuAdministration;
@@ -30,13 +29,17 @@ public class Admin extends User {
 	private TextInput searchQuery;	
 	private Element searchBtn;
 	private Element searchResults;
-	private Element dropdownMenuBtn;	
+	private Element dropdownMenuBtn;
+	private Element actions43Btn;
+	private Element actionsAdminEdit;
+	private Element actionSaveBtn;
 	private Element deleteItemBtn;	
 	private Element confirmDeleteItemBtn;
 	private Element detectedItem;
 	private Element allCampaignsMnu;
 	private Element allUsersMnu;
 	private Element allOrdersMnu;
+	private Element adminsMnu;
 	
 	// Moderation page	    
 	private Element acceptedModeration;	
@@ -53,13 +56,19 @@ public class Admin extends User {
 		searchQuery = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("searchQuery")));	
 		searchBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("searchBtn")));	
 		searchResults = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("searchResults"))); 
-		dropdownMenuBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("dropdownMenuBtn")));	
+		dropdownMenuBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("dropdownMenuBtn")));
+		
+		actions43Btn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("actions43Btn")));
+		actionsAdminEdit = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("actionsAdminEdit")));
+		actionSaveBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("actionSaveBtn")));
+		
 		deleteItemBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("deleteItemBtn")));	
 		confirmDeleteItemBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("confirmDeleteItemBtn")));
 		detectedItem = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("detectedItem")));
 		allCampaignsMnu = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("allCampaignsMnu")));
 		allUsersMnu = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("allUsersMnu")));
-		allOrdersMnu = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("allOrdersMnu")));
+		allOrdersMnu = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("allOrdersMnu")));		
+		adminsMnu = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("adminpage").get("adminsMnu")));
 		// Moderation page	    
 		acceptedModeration = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("moderationpage").get("acceptedModeration")));
 		saveChangesModeration = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("moderationpage").get("saveChangesModeration")));
@@ -102,14 +111,20 @@ public class Admin extends User {
 	
 	private void removeItems(Element menu, String searchLine) {
 		
+		int countDeletedItem = 0;
+		
 		searhItems(menu, searchLine);
 		
-		while ( !searchResults.getText().contains("No results found") ) {
+		while ( !searchResults.getText().contains("No results found") && ++countDeletedItem < 10 ) {
 			dropdownMenuBtn.click();
 			deleteItemBtn.click();
 			confirmDeleteItemBtn.click();
 			searchBtn.click();
-		}		
+		}
+		if (countDeletedItem == 10) {
+			FAILED.writeln("Problem with removing an item through Administration page");
+			throw new TestFailedException();
+		}
 	}
 	
     @Override
@@ -214,13 +229,17 @@ public class Admin extends User {
 		try {
 			
 			WebDriverWait wait = new WebDriverWait(driver, 5);
-			driver.get(editUser43);
+			adminsMnu.click();
+			actions43Btn.click();
+			actionsAdminEdit.click();
+			
 			wait.until(ExpectedConditions.titleContains("Edit User (#43)"));
 			
 			WebElement checkboxModerator = driver.findElement(By.cssSelector("input[value='ROLE_MODERATOR']"));
 			if ( tick && checkboxModerator.getAttribute("checked") == null ) checkboxModerator.click();
 			if ( !tick && checkboxModerator.getAttribute("checked") != null ) checkboxModerator.click();
-			driver.findElement(By.cssSelector("button.action-save")).click();		
+			actionSaveBtn.click();
+			
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
 		} catch (Exception e) {
@@ -292,6 +311,8 @@ public class Admin extends User {
 		
 		boolean end;
 		allOrdersMnu.click();
+		
+		int countDeletedOrders = 0;
 		do {
 			end = false;
 	
@@ -307,7 +328,11 @@ public class Admin extends User {
 					break;
 				}			
 			}
-		} while (end);
+		} while (end && ++countDeletedOrders < 10);
+		if (countDeletedOrders == 10) {
+			FAILED.writeln("Problem with removing orders through Administration page");
+			throw new TestFailedException();
+		}
 	}
 
 	public void acceptCampaignByEmail(String linkCssSelector, String campaignName) {
@@ -341,7 +366,7 @@ public class Admin extends User {
 		saveChangesModeration.click();
 	}
 	
-	public CompaignStatus getCampaignStatus(String campaignId) {
+	public ModerationCampaignStatus getCampaignStatus(String campaignId) {
 		
 		ACTION.writeln("Get status for Campaign #" + campaignId);
 		flow.setDriver(driver);
@@ -353,10 +378,10 @@ public class Admin extends User {
 		for (WebElement el : checkboxes) {
 			if (el.getAttribute("checked") != null ) {
 				switch ( el.getAttribute("value") ) {
-					case "0" : return CompaignStatus.NONE;
-					case "2" : return CompaignStatus.NEEDS_MODERATION;
-					case "1" : return CompaignStatus.ACCEPT;
-					case "-1" : return CompaignStatus.DECLINE;
+					case "0" : return ModerationCampaignStatus.NONE;
+					case "2" : return ModerationCampaignStatus.NEEDS_MODERATION;
+					case "1" : return ModerationCampaignStatus.ACCEPT;
+					case "-1" : return ModerationCampaignStatus.DECLINE;
 				}
 			}
 		}
@@ -364,7 +389,7 @@ public class Admin extends User {
 		return null;
 	}
 
-	public void moderateCampaign(String campaignId, CompaignStatus status) {
+	public void moderateCampaign(String campaignId, ModerationCampaignStatus status) {
 		
 		ACTION.writeln("Moderate Campaign #" + campaignId + " to " + status + " status");
 		flow.setDriver(driver);
@@ -390,7 +415,7 @@ public class Admin extends User {
 		}
 		if ( checkboxModerator.getAttribute("checked") == null ) {
 			checkboxModerator.click();
-			if (status == CompaignStatus.DECLINE) 
+			if (status == ModerationCampaignStatus.DECLINE) 
 				campaignModerationComment.set("Test decline message");
 			saveChangesModeration.click();
 		}

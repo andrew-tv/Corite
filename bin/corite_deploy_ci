@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#set -x
+WDIR=$(dirname $0)"/.."
+DUMP_FILE=$WDIR/data/corite_ci-20180725_1051.sql.xz
+INSECURE_FILE=/Users/andrew/Documents/workspace2/Corite/insecure.yml
+
+function err() {
+    echo Error: $*
+    exit
+}
+
+DBU=$(cat $INSECURE_FILE |yq .DB.user 2>/dev/null)
+DBP=$(cat $INSECURE_FILE |yq -r .DB.pass 2>/dev/null)
+DB=$(cat $INSECURE_FILE |yq .DB.db 2>/dev/null)
+
+[ "x$DBU" == "x" -o "x$DBP" == "x" -o ! -f "$DUMP_FILE" ] && err "Not enough params for DB migrating"
+
+cat "$DUMP_FILE"|xz -dc -|ssh corite@ci.corite.com "mysql -u $DBU -p$DBP $DB"
+ssh corite@ci.corite.com "cd ~/corite.com/html/admin.ci;composer install"
+

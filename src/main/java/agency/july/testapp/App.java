@@ -5,13 +5,9 @@ import static agency.july.logger.Logevent.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.yaml.snakeyaml.Yaml;
@@ -22,10 +18,11 @@ import agency.july.config.models.Configuration;
 import agency.july.flow.Admin;
 import agency.july.flow.Flow;
 import agency.july.flow.GoogleUser;
+import agency.july.flow.ModerationCampaignStatus;
+import agency.july.flow.CampaignStatus;
 import agency.july.flow.ReleaseStatus;
 import agency.july.flow.TestFailedException;
 import agency.july.flow.User;
-import agency.july.flow.CompaignStatus;
 import agency.july.flow.FacebookUser;
 import agency.july.logger.TestingLogger;
 import agency.july.sendmail.ImapClient;
@@ -41,51 +38,52 @@ public class App {
 		
 		long startTime = System.currentTimeMillis();
 		
-	    Admin admin = null;
-	    Admin root = null;
+		BufferedReader br = new BufferedReader(new FileReader(new File("./thispath.txt")));
+		String thispath = br.readLine();
+		br.close();
+        System.out.println("thispath : " + thispath);
+		 
+		config = yaml.loadAs( new FileInputStream (new File(thispath + "params.yml")), Configuration.class );
+		accesses = yaml.loadAs( new FileInputStream (new File(thispath + "insecure.yml")), Accesses.class );
+        System.out.println(config.toString());
+        System.out.println(accesses.toString());
+        
+		new TestingLogger(Paths.get(Accesses.getPathto().get("logfile")));
+		
+		DEBUG.setEnable(Configuration.getLogger().get("debug"));
+		ACTION.setEnable(Configuration.getLogger().get("action"));
+		INFO.setEnable(Configuration.getLogger().get("info"));
+		WARNING.setEnable(Configuration.getLogger().get("warning"));
+		PASSED.setEnable(Configuration.getLogger().get("passed"));
+		FAILED.setEnable(Configuration.getLogger().get("failed"));
+					
+		// Predefined conditions
+		// To make sure that there are no unread emails
+	    ImapClient imapClient = new ImapClient (Accesses.getEmail());
+	    imapClient.markAsSeen(Accesses.getLogins().get("noreply"));
+
+	    // Browsers for testing
+		BrowserProps descTopBrowser = Configuration.getBrowsers().get("DescTop");
+		BrowserProps iPhone6Browser = Configuration.getBrowsers().get("IPhone6");
+
+		Flow flowBeforAfter = new Flow( "befor_after_testing" );
+	    Admin admin = new Admin( flowBeforAfter, descTopBrowser ).withUser( "admin" );
+		Admin root = new Admin( flowBeforAfter, descTopBrowser ).withUser( "root" );
+		
 		try {
 			
-			BufferedReader br = new BufferedReader(new FileReader(new File("./thispath.txt")));
-			String thispath = br.readLine();
-			br.close();
-	        System.out.println("thispath : " + thispath);
-			 
-			config = yaml.loadAs( new FileInputStream (new File(thispath + "params.yml")), Configuration.class );
-			accesses = yaml.loadAs( new FileInputStream (new File(thispath + "insecure.yml")), Accesses.class );
-	        System.out.println(config.toString());
-	        System.out.println(accesses.toString());
-	        
-			new TestingLogger(Paths.get(Accesses.getPathto().get("logfile")));
-			
-			DEBUG.setEnable(Configuration.getLogger().get("debug"));
-			ACTION.setEnable(Configuration.getLogger().get("action"));
-			INFO.setEnable(Configuration.getLogger().get("info"));
-			WARNING.setEnable(Configuration.getLogger().get("warning"));
-			PASSED.setEnable(Configuration.getLogger().get("passed"));
-			FAILED.setEnable(Configuration.getLogger().get("failed"));
-			
-			// Browsers for testing
-			BrowserProps descTopBrowser = Configuration.getBrowsers().get("DescTop");
-			BrowserProps iPhone6Browser = Configuration.getBrowsers().get("IPhone6");
-			
-			// Predefined conditions
-			// To make sure that there are no unread emails
-		    ImapClient imapClient = new ImapClient (Accesses.getEmail());
-		    imapClient.markAsSeen(Accesses.getLogins().get("noreply"));
-		    
-		    admin = new Admin( new Flow( "befor_after_testing" ), descTopBrowser ).withUser( "admin" );
-			admin.login();
+		    admin.login();
 			admin.navigateToAdminPage();
 //			admin.navigateToCampaign("389");
 //			admin.sendMoney("389", 100f);
 			admin.setModeratorRole43(true); // Set moderator role for admin
-		    root = new Admin( new Flow( "befor_after_testing" ), descTopBrowser ).withUser( "root" );
+			
 		    root.login();
 		    root.navigateToAdminPage();
 		    root.removeUsers("temporary");		    
-		    root.removeOrders("Temporary19235");
+/*		    root.removeOrders("Temporary19235");
 		    root.removeCampaigns("Temporary19235");
-		    
+*/
 			// Определяем потоки выполнения. Каждый тест в своем потоке
 			Thread threadLoginLogout = null;
 			Thread threadRegisterWithEmail = null;
@@ -104,13 +102,8 @@ public class App {
 					case "payouts" : 
 						Flow flow = new Flow( "payouts" );
 						User user = new User( flow, iPhone6Browser ).withUser( "campaigncreator1" );
-					try {
 						user.login();
 						user.checkPayoutsBalance(1200);
-					} catch (Exception e) {
-						user.teardown();
-					}
-						
 					break;
 				
 					case "loginlogout" : 
@@ -234,6 +227,12 @@ public class App {
 //								admin.navigateToCampaign(campaignId);
 //								admin.sendMoney(campaignId, 100f);
 //								user.checkPayoutsBalance(1200);
+					            
+					            user.checkMyCampaignStatus(campaignId, CampaignStatus.FUNDED);
+					            
+					            user.cancelCampaign(campaignId);
+					            
+					            user.checkMyCampaignStatus(campaignId, CampaignStatus.ACTIVE);
 
 							} catch (TestFailedException e) {
 								flow.makeErrorScreenshot();
@@ -357,7 +356,7 @@ public class App {
 					            // Prepare initial state
 								admin.login();
 								admin.navigateToAdminPage();
-					            admin.moderateCampaign("295", CompaignStatus.NONE);
+					            admin.moderateCampaign("295", ModerationCampaignStatus.NONE);
 
 					            // Begin test
 					            user.login();
@@ -365,13 +364,13 @@ public class App {
 					            
 					            flow.sleep(1000); // Waiting for changing status of the campaign in database
 					            
-					            if ( admin.getCampaignStatus("295") == CompaignStatus.NEEDS_MODERATION ) 
+					            if ( admin.getCampaignStatus("295") == ModerationCampaignStatus.NEEDS_MODERATION ) 
 					            	PASSED.writeln("Release information of campaign #295 was filled in by '" + user.getUserEmail() + "'");
 					            else
 					            	throw new TestFailedException();
 					            
 					            // Restore initial state
-					            admin.moderateCampaign("295", CompaignStatus.DECLINE);
+					            admin.moderateCampaign("295", ModerationCampaignStatus.DECLINE);
 					            
 					            user.checkDeclineEmail();
 					            
@@ -440,19 +439,20 @@ public class App {
             // Reset moderator role for admin
             admin.setModeratorRole43(false);
             admin.teardown();
+            
             root.removeUsers("temporary");
-		    root.removeOrders("Temporary19235");
+/*		    root.removeOrders("Temporary19235");
 		    root.removeCampaigns("Temporary19235");
             root.teardown();
-
-		} catch (FileNotFoundException e1) {
-			System.out.println("Could not load a configuration file: './params.yml' or './insecure.yml'");
-    		e1.printStackTrace();
+*/
+		} catch (TestFailedException e) {
+			FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flowBeforAfter.getFlowName() + "'. Current slide #" + flowBeforAfter.getCurrentSlideNumber());
+			flowBeforAfter.makeErrorScreenshot();
+//            root.teardown();
+            admin.teardown();
         } catch (Exception e) {
     		e.printStackTrace();
         } finally {
-            admin.teardown();
-            root.teardown();
         	if (TestingLogger.output != null) TestingLogger.output.close();
         	System.out.println("----------------- Conclusion ---------------");
         	System.out.println( "In total " + ( FAILED.getCount() + PASSED.getCount() ) + " tests were performed");
