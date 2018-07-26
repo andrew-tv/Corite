@@ -1,5 +1,5 @@
 package agency.july.flow;
 
 public enum ModerationCampaignStatus {
-	NONE, NEEDS_MODERATION, ACCEPT, DECLINE
+	NONE, DRAFT, NEEDS_MODERATION, ACCEPT, DECLINE
 }

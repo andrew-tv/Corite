@@ -321,9 +321,9 @@ public class User /*extends Test*/ {
 		try {
 			WebDriverWait wait = new WebDriverWait(driver, 5);
 			wait.until(ExpectedConditions.presenceOfElementLocated( campaignOwnEditor ));
-			PASSED.writeln("My campaigns list page was reached");
+			PASSED.writeln("My campaign editor page was reached");
 		} catch (TimeoutException e) {
-			FAILED.writeln("My campaigns list page wasn't reached");
+			FAILED.writeln("My campaign editor page wasn't reached");
 			throw new TestFailedException();			
 		}
 	}
@@ -926,6 +926,21 @@ public class User /*extends Test*/ {
 		navigateMyCampaignEditor(campaignId);
 		cancelCampaign.click();
 		submitBtn.click();
+		
+		flow.makeScreenshot("CC_A");
+//		WebDriverWait wait = new WebDriverWait(driver, 20);
+		boolean done = cancelCampaign.exists();
+		DEBUG.writeln("done = " + done);
+
+		int i = 0;
+		while (cancelCampaign.exists() && i++ < 10) flow.sleep(200);
+		
+		
+//		flow.sleep(2000);
+		done = cancelCampaign.exists();
+		
+		DEBUG.writeln("done = " + done);
+		flow.makeScreenshot("CC_B");
 	}
 	
 	protected CampaignStatus getMyCampaignStatus(String campaignId) {
@@ -964,7 +979,7 @@ public class User /*extends Test*/ {
 	
     protected void finalize() throws Throwable {
     	teardown();
-        System.out.printf("Web driver is getting garbage collected");
+//        System.out.printf("Web driver is getting garbage collected");
     }
 
 }

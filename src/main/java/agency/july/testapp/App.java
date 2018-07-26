@@ -44,7 +44,7 @@ public class App {
         System.out.println("thispath : " + thispath);
 		 
 		config = yaml.loadAs( new FileInputStream (new File(thispath + "params.yml")), Configuration.class );
-		accesses = yaml.loadAs( new FileInputStream (new File(thispath + "insecure.yml")), Accesses.class );
+		accesses = yaml.loadAs( new FileInputStream (new File("./insecure.yml")), Accesses.class );
         System.out.println(config.toString());
         System.out.println(accesses.toString());
         
@@ -208,9 +208,12 @@ public class App {
 					            user.login();
 					            user.startCampaign(Configuration.getPatterns().get(2));
 					            
+					            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(2).split(" ")[1]);
+					            user.checkMyCampaignStatus(campaignId, CampaignStatus.ACTIVE);
+					            
 					            admin.acceptCampaignByEmail("a.inform-campaign-to-moderate", Configuration.getPatterns().get(2));
 					            
-					            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(2).split(" ")[1]);
+//					            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(2).split(" ")[1]);
 					            
 					            nonameUser.checkCampaignInList(campaignId);
 					            
@@ -453,7 +456,7 @@ public class App {
         } catch (Exception e) {
     		e.printStackTrace();
         } finally {
-        	if (TestingLogger.output != null) TestingLogger.output.close();
+      	if (TestingLogger.output != null) TestingLogger.output.close();
         	System.out.println("----------------- Conclusion ---------------");
         	System.out.println( "In total " + ( FAILED.getCount() + PASSED.getCount() ) + " tests were performed");
         	System.out.println( FAILED.getCount() + " tests have been failed");
@@ -471,6 +474,7 @@ public class App {
         	System.out.println( "Executing time (hh:mm:ss:mls): " + time);
         	
         	System.runFinalization();
+        	System.exit( FAILED.getCount() );
         }	        
     }
 }
