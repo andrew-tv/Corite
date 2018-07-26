@@ -44,7 +44,7 @@ public class App {
         System.out.println("thispath : " + thispath);
 		 
 		config = yaml.loadAs( new FileInputStream (new File(thispath + "params.yml")), Configuration.class );
-		accesses = yaml.loadAs( new FileInputStream (new File("./insecure.yml")), Accesses.class );
+		accesses = yaml.loadAs( new FileInputStream (new File("/Users/andrew/Documents/workspace2/Corite/insecure.yml")), Accesses.class );
         System.out.println(config.toString());
         System.out.println(accesses.toString());
         
@@ -212,8 +212,6 @@ public class App {
 					            user.checkMyCampaignStatus(campaignId, CampaignStatus.ACTIVE);
 					            
 					            admin.acceptCampaignByEmail("a.inform-campaign-to-moderate", Configuration.getPatterns().get(2));
-					            
-//					            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(2).split(" ")[1]);
 					            
 					            nonameUser.checkCampaignInList(campaignId);
 					            

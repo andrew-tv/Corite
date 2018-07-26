@@ -927,20 +927,9 @@ public class User /*extends Test*/ {
 		cancelCampaign.click();
 		submitBtn.click();
 		
-		flow.makeScreenshot("CC_A");
-//		WebDriverWait wait = new WebDriverWait(driver, 20);
-		boolean done = cancelCampaign.exists();
-		DEBUG.writeln("done = " + done);
-
+		// Wait for canceling campaign ('Cancel campaign' button disappears)
 		int i = 0;
-		while (cancelCampaign.exists() && i++ < 10) flow.sleep(200);
-		
-		
-//		flow.sleep(2000);
-		done = cancelCampaign.exists();
-		
-		DEBUG.writeln("done = " + done);
-		flow.makeScreenshot("CC_B");
+		while (cancelCampaign.exists() && i++ < 10) flow.sleep(500);
 	}
 	
 	protected CampaignStatus getMyCampaignStatus(String campaignId) {
