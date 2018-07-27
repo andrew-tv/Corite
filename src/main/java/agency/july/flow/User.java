@@ -199,6 +199,20 @@ public class User /*extends Test*/ {
 		return userEmail;
 	}
 	
+	public String getBaseUrl() {
+		return Accesses.getUrls().get("base");
+	}
+	
+    public void goHome() { 
+    	try {
+			driver.get(Accesses.getUrls().get("base"));
+		} catch (TimeoutException e) {
+			FAILED.writeln("Don't open base URL: " + Accesses.getUrls().get("base"));
+			e.printStackTrace();
+			throw new TestFailedException();
+		}
+    }
+	
 	protected void fillLoginForm() {
 		emailIn.set(userEmail);
 		submitBtn.click();
@@ -209,22 +223,22 @@ public class User /*extends Test*/ {
 
 	public void login () {
 		
-		ACTION.writeln("Login user : " + this.userEmail);		
-		flow.setDriver(driver);
-		WebDriverWait wait = new WebDriverWait(driver, 15);
-		
-	    goHome();
-		try {
-			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.welcome")) );
-			PASSED.writeln("Welcome page was reached");
-		} catch (TimeoutException e) {
-			WARNING.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
-//			FAILED.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
-//			flow.makeErrorScreenshot();
-		}
-		
 		try {
 			
+			ACTION.writeln("Login user : " + this.userEmail);		
+			flow.setDriver(driver);
+			WebDriverWait wait = new WebDriverWait(driver, 15);
+			
+		    goHome();
+			try {
+				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.welcome")) );
+				PASSED.writeln("Welcome page was reached");
+			} catch (TimeoutException e) {
+				WARNING.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
+	//			FAILED.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
+	//			flow.makeErrorScreenshot();
+			}
+		
 			if ( loginBtn.exists() ) { // The user is not login
 								
 				loginBtn.click();
@@ -252,6 +266,7 @@ public class User /*extends Test*/ {
 		} catch (TestFailedException e) {
 			throw new TestFailedException();
 		} catch (Exception e) {
+			FAILED.writeln("Something went wrong at login() method ");
 			e.printStackTrace();
 			throw new TestFailedException();
 		}
@@ -926,14 +941,6 @@ public class User /*extends Test*/ {
 			FAILED.writeln("There isn't campaign #" + campaignId + " on Explore list");
 			flow.makeErrorScreenshot();    	
 	    }
-    }
-    
-	public String getBaseUrl() {
-		return Accesses.getUrls().get("base");
-	}
-	
-    public void goHome() { 
-    	driver.get(Accesses.getUrls().get("base"));
     }
     
 	public void checkFormFillingError(boolean throwExeption) {
