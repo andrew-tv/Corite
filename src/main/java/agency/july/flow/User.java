@@ -75,8 +75,12 @@ public class User /*extends Test*/ {
 
 	// Invest page
 	private Slider slider;
-	private Element anotherCardBtn;
-	private Element newCardBtn;
+	private Element anotherStripeCardBtn;
+	private Element newStripeCardBtn;
+	private Element anotherSwishCardBtn;
+	private Element newSwishCardBtn;
+	private TextInput swishPhoneNumber;
+	
 	private Element thankyou;
 	private Element iframe;
 	
@@ -99,7 +103,8 @@ public class User /*extends Test*/ {
 	private TextInput campaignArtist;
 	private TextInput campaignGenre;
 	private Element campaignGenreSelect;
-	private Slider campaignValue;
+	private Slider campaignValueSlider;
+	private Element campaignValueNumber;
 	private TextInput textArea;
 	private Element iagree;
 	
@@ -144,8 +149,12 @@ public class User /*extends Test*/ {
 		buyCoritesBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("buyCoritesBtn")));
 		// Invest page
 		slider = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("slider")));
-		anotherCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherCardBtn")));
-		newCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newCardBtn")));
+		anotherStripeCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherStripeCardBtn")));
+		newStripeCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newStripeCardBtn")));
+		anotherSwishCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherSwishCardBtn")));
+		newSwishCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newSwishCardBtn")));
+		swishPhoneNumber = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("swishPhoneNumber")));
+
 		iframe = new Element(this.flow, By.cssSelector ("ngx-stripe-card iframe"));
 		thankyou = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("thankyou")));
 		// Login page
@@ -209,8 +218,9 @@ public class User /*extends Test*/ {
 			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div.welcome")) );
 			PASSED.writeln("Welcome page was reached");
 		} catch (TimeoutException e) {
-			FAILED.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
-			flow.makeErrorScreenshot();
+			WARNING.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
+//			FAILED.writeln("Welcome page was not reached or user '" + this.getUserFullName() + "' has been already logged in");
+//			flow.makeErrorScreenshot();
 		}
 		
 		try {
@@ -455,7 +465,8 @@ public class User /*extends Test*/ {
 		campaignArtist = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignArtist")));
 		campaignGenre = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenre")));
 		campaignGenreSelect = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignGenreSelect")));
-		campaignValue = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValue")));
+		campaignValueSlider = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValueSlider")));
+		campaignValueNumber = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("campaignValueNumber")));
 		textArea = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("textArea")));
 		iagree = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("startcampaignpage").get("iagree")));
 		
@@ -467,12 +478,24 @@ public class User /*extends Test*/ {
 				
 			startCampaignTab.click(); // Go to start campaign page
 			
-			campaignImage.set(new File (Accesses.getPathto().get("files") + "Abba-007.jpg").getAbsolutePath());
-//			campaignValue.set(Keys.ARROW_RIGHT);			
-			campaignValue.set(20);
+//			campaignValueSlider.set(Keys.ARROW_RIGHT);
+			
+//			flow.makeScreenshot("A");
+			campaignValueSlider.set(20);
+			flow.sleep(100);
+//			flow.makeScreenshot("B");
+			String value = campaignValueNumber.getText();
+			if (value.equals("18 000")) 
+				PASSED.writeln("Campaign value was set: 18 000");
+			else {
+				FAILED.writeln("Setting campaign value error. Campaign value is '" + value + "'. Expected '18 000'");
+				throw new TestFailedException();				
+			}
 						
+			campaignImage.set(new File (Accesses.getPathto().get("files") + "Abba-007.jpg").getAbsolutePath());
 //			campaignSong.set(new File (Accesses.getPathto().get("files") + "abba__the_day_before_you_came.mp3").getAbsolutePath());
 			campaignSong.set(new File (Accesses.getPathto().get("files") + "chillingmusic.wav").getAbsolutePath());
+//			flow.makeScreenshot("C");
 			try {
 				wait.until( ExpectedConditions.textToBe(By.cssSelector("app-audio > div > app-slider > div.max"), "00:27") );
 				PASSED.writeln("Audio has been uploaded");
@@ -521,7 +544,7 @@ public class User /*extends Test*/ {
 		}
 	}
 	
-	public void buyCorites (String campaignId, int quantity) {
+	public void buyCorites (String campaignId, int quantity, IBankomat bankomat, boolean accept) {
 				
 		ACTION.writeln("Buy corites. User: '" + this.getUserFullName() + "'");
 		flow.setDriver(driver);
@@ -553,65 +576,80 @@ public class User /*extends Test*/ {
 			FAILED.writeln("Page with element 'page-explore-invest' was not reached");
 			throw new TestFailedException();
 		}
-
-		boolean userHaveCard = anotherCardBtn.exists(); // User have creditcard
 		
-		if ( userHaveCard ) 
-			anotherCardBtn.click();
-		else
-			newCardBtn.click();
+		String bankomatType = bankomat.getClass().getSimpleName();
 		
-		if ( iframe.exists() ) {
-			
-			int i = 0;		
-			do {
-				driver.switchTo().defaultContent();
-				flow.sleep(100);
-				driver.switchTo().frame(driver.findElement(iframe.getBy()));
-			} while ( driver.findElements(By.cssSelector("div#root > form")).size() == 0 && i++ < 20 );
-			
-			try {
-				WebDriverWait waitIntoIframe = new WebDriverWait(driver, 5);
-				waitIntoIframe.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div#root > form")) );
-				PASSED.writeln("There is access to 'Stripe' iframe on the invest page");
-			} catch (TimeoutException e) {
-				FAILED.writeln("There isn't access to 'Stripe' iframe on the invest page");
-				flow.makeErrorScreenshot();
-				flow.makeErrorPageSource();
-				driver.switchTo().frame(0);
-				flow.sleep(1000);
-			}
-			
-			cardNumber.set("4242424242424242");
-			expDate.set("424");
-			cvc.set("242");
-			zip.set("42424");
-			
-			driver.switchTo().defaultContent();
-			
-			if ( userHaveCard ) {
-				submitBtn.click(); // Get corites
+		switch (bankomatType) {
+		
+		case "Stripe" :
+			boolean userHaveCard = anotherStripeCardBtn.exists(); // User have creditcard
+			if ( userHaveCard ) 
+				anotherStripeCardBtn.click();
+			else 
+				newStripeCardBtn.click();
+			if ( iframe.exists() ) {
 				
-				if ( thankyou.exists() ) {
+				int i = 0;		
+				do {
+					driver.switchTo().defaultContent();
+					flow.sleep(100);
+					driver.switchTo().frame(driver.findElement(iframe.getBy()));
+				} while ( driver.findElements(By.cssSelector("div#root > form")).size() == 0 && i++ < 20 );
 				
-					PASSED.writeln("Thankyou invest page was reached.");
-/*					
-					if ( quantity == 100 ) { // If it was bought 100% of corites then therefore the campaign is FUNDED
-						navigateToCampaign(campaignId);
-					}
-*/					
-				} else {
-					FAILED.writeln("Thankyou invest page was not reached.");
+				try {
+					WebDriverWait waitIntoIframe = new WebDriverWait(driver, 5);
+					waitIntoIframe.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div#root > form")) );
+					PASSED.writeln("There is access to 'Stripe' iframe on the invest page");
+				} catch (TimeoutException e) {
+					FAILED.writeln("There isn't access to 'Stripe' iframe on the invest page");
 					flow.makeErrorScreenshot();
+					flow.makeErrorPageSource();
+					driver.switchTo().frame(0);
+					flow.sleep(1000);
 				}
+				
+				cardNumber.set("4242424242424242");
+				expDate.set("424");
+				cvc.set("242");
+				zip.set("42424");
+				
+				driver.switchTo().defaultContent();
+				
 			} else {
-				accentBtn.click(); // Cancel getting corites
-				exploreTab.click(); // Navigate from invest page to unblock the order immediately
+				FAILED.writeln("iframe, for setting the credit card information, is not exist");			
+				flow.makeErrorScreenshot();
+			}
+		break;
+		
+		case "Swish" :
+			boolean userHavePhone = anotherSwishCardBtn.exists(); // User have creditcard
+			if ( userHavePhone ) 
+				anotherSwishCardBtn.click();
+			else
+				newSwishCardBtn.click();
+				
+			swishPhoneNumber.set("+46(050)1111111");
+			
+		break;
+		default :
+			FAILED.writeln("Unknown payment system: " + bankomatType);
+			throw new TestFailedException();			
+		}
+		
+		if ( accept ) {
+			submitBtn.click(); // Get corites
+			
+			if ( thankyou.exists() ) {		
+				PASSED.writeln("Thankyou invest page was reached.");
+			} else {
+				FAILED.writeln("Thankyou invest page was not reached.");
+				flow.makeErrorScreenshot();
 			}
 		} else {
-			FAILED.writeln("iframe for credit card information is not exist. See screenshot: 'Error_buyCorites_2'");			
-			flow.makeErrorScreenshot();
+			accentBtn.click(); // Cancel getting corites
+			exploreTab.click(); // Navigate from invest page to unblock the order immediately
 		}
+
 	}
 	
 	public void checkIncorrectCard(String campaignId, String card) {
@@ -653,12 +691,12 @@ public class User /*extends Test*/ {
 			throw new TestFailedException();
 		}
 
-		boolean userHaveCard = anotherCardBtn.exists(); // User have creditcard	
+		boolean userHaveCard = anotherStripeCardBtn.exists(); // User have creditcard	
 	
 		if ( userHaveCard ) 
-			anotherCardBtn.click();
+			anotherStripeCardBtn.click();
 		else
-			newCardBtn.click();
+			newStripeCardBtn.click();
 		
 		if ( iframe.exists() ) {
 			
@@ -940,6 +978,7 @@ public class User /*extends Test*/ {
 
 		INFO.writeln("Campaign status is '" + campaignStatus + "'"); 
 		switch ( campaignStatus ) {
+			case "DRAFT" : return CampaignStatus.DRAFT;
 			case "ACTIVE" : return CampaignStatus.ACTIVE;
 			case "FUNDED" : return CampaignStatus.FUNDED;
 			case "FAILED" : return CampaignStatus.FAILED;
@@ -958,7 +997,7 @@ public class User /*extends Test*/ {
     		PASSED.writeln("Campaign status is expected: '" + status + "'");
     	else {
     		FAILED.writeln("Unexpected Campaign status : '" + actualStatus + "'. '" + status + "' was expected");
-    		flow.makeErrorPageSource();
+    		flow.makeErrorScreenshot();
     	}
 	}
 

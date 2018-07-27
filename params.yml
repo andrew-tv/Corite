@@ -76,7 +76,8 @@ csss:
        campaignArtist: "campaign-group-own-basics input[name='campaign[artist]']"
        campaignGenre: "campaign-group-own-genre input"
        campaignGenreSelect: "div.mat-autocomplete-panel > mat-option:nth-of-type(1)"
-       campaignValue: "campaign-group-own-value mat-slider"
+       campaignValueSlider: "campaign-group-own-value mat-slider"
+       campaignValueNumber: "campaign-group-own-value strong"
        textArea: "textarea"
        iagree: ".mat-checkbox-inner-container"
     campaigneditpage:
@@ -89,8 +90,11 @@ csss:
     investpage:
        campaignStatus: "campaign-status"
        slider: "mat-slider"
-       anotherCardBtn: "span.change"
-       newCardBtn: ".is-empty>div"
+       anotherStripeCardBtn: "[data-e2e=stripe] [data-e2e=change]"
+       newStripeCardBtn: "[data-e2e=stripe] [data-e2e=card]"
+       anotherSwishCardBtn: "[data-e2e=swish] [data-e2e=change]"
+       newSwishCardBtn: "[data-e2e=swish] [data-e2e=card]"
+       swishPhoneNumber: "[data-e2e=input-phone]"
        thankyou: "campaign-invest-thanks"
        buyCoritesBtn: "button.mat-flat-button.mat-primary"
     adminpage:
@@ -138,10 +142,10 @@ logger:
     failed: true
 
 runtests:
-   - loginlogout
-   - registerwithemail
+#   - loginlogout
+#   - registerwithemail
    - startcampaign
-   - releaseinformation
+#   - releaseinformation
    - releasecampaign
-   - incorrectcard
+#   - incorrectcard
 #   - payouts

@@ -21,6 +21,8 @@ import agency.july.flow.GoogleUser;
 import agency.july.flow.ModerationCampaignStatus;
 import agency.july.flow.CampaignStatus;
 import agency.july.flow.ReleaseStatus;
+import agency.july.flow.Stripe;
+import agency.july.flow.Swish;
 import agency.july.flow.TestFailedException;
 import agency.july.flow.User;
 import agency.july.flow.FacebookUser;
@@ -209,6 +211,7 @@ public class App {
 					            user.startCampaign(Configuration.getPatterns().get(2));
 					            
 					            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(2).split(" ")[1]);
+					            
 					            user.checkMyCampaignStatus(campaignId, CampaignStatus.ACTIVE);
 					            
 					            admin.acceptCampaignByEmail("a.inform-campaign-to-moderate", Configuration.getPatterns().get(2));
@@ -216,9 +219,11 @@ public class App {
 					            nonameUser.checkCampaignInList(campaignId);
 					            
 					            newuser.login();
-					            newuser.buyCorites (campaignId, 100); // With canceling for new users
+					            newuser.buyCorites (campaignId, 100, new Stripe(), false ); // With canceling for new users
+					            newuser.buyCorites (campaignId, 100, new Swish(), false ); // With canceling for new users
 
-					            user.buyCorites (campaignId, 100);
+					            user.buyCorites (campaignId, 50, new Stripe(), true );
+					            user.buyCorites (campaignId, 100, new Swish(), true );
 					            
 					            user.checkEmailLink("a.inform-creator-about-accept", "page-explore-view explore-full>article");
 					            user.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
@@ -233,7 +238,9 @@ public class App {
 					            
 					            user.cancelCampaign(campaignId);
 					            
-					            user.checkMyCampaignStatus(campaignId, CampaignStatus.ACTIVE);
+					            user.checkMyCampaignStatus(campaignId, CampaignStatus.DRAFT);
+					            
+					            user.checkEmailLink("a[data-e2e=informBackerAboutCancelCampaign]", "page-explore-list");
 
 							} catch (TestFailedException e) {
 								flow.makeErrorScreenshot();
@@ -282,12 +289,12 @@ public class App {
 					            creator.fillReleaseInfo(campaignId);
 					            
 					            backer.login();
-					            backer.buyCorites (campaignId, 50);
+					            backer.buyCorites (campaignId, 50, new Stripe(), true);
 					            
 					            backerTwo.login();
-					            backerTwo.buyCorites (campaignId, 80);
+					            backerTwo.buyCorites (campaignId, 80, new Stripe(), true);
 					            
-					            creator.buyCorites (campaignId, 100);
+					            creator.buyCorites (campaignId, 100, new Stripe(), true);
 
 					            backer.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
 					            backerTwo.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
@@ -441,8 +448,8 @@ public class App {
             admin.setModeratorRole43(false);
             admin.teardown();
             
-            root.removeUsers("temporary");
-/*		    root.removeOrders("Temporary19235");
+/*          root.removeUsers("temporary");
+		    root.removeOrders("Temporary19235");
 		    root.removeCampaigns("Temporary19235");
             root.teardown();
 */
