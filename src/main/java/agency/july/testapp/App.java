@@ -70,7 +70,7 @@ public class App {
 
 		Flow flowBeforAfter = new Flow( "befor_after_testing" );
 	    Admin admin = new Admin( flowBeforAfter, descTopBrowser ).withUser( "admin" );
-		Admin root = new Admin( flowBeforAfter, descTopBrowser ).withUser( "root" );
+//		Admin root = new Admin( flowBeforAfter, descTopBrowser ).withUser( "root" );
 		
 		try {
 			
@@ -79,11 +79,11 @@ public class App {
 //			admin.navigateToCampaign("389");
 //			admin.sendMoney("389", 100f);
 			admin.setModeratorRole43(true); // Set moderator role for admin
-			
+/*			
 		    root.login();
 		    root.navigateToAdminPage();
 		    root.removeUsers("temporary");		    
-/*		    root.removeOrders("Temporary19235");
+		    root.removeOrders("Temporary19235");
 		    root.removeCampaigns("Temporary19235");
 */
 			// Определяем потоки выполнения. Каждый тест в своем потоке
@@ -219,11 +219,11 @@ public class App {
 					            nonameUser.checkCampaignInList(campaignId);
 					            
 					            newuser.login();
-					            newuser.buyCorites (campaignId, 100, new Stripe(), false ); // With canceling for new users
-					            newuser.buyCorites (campaignId, 100, new Swish(), false ); // With canceling for new users
+					            newuser.buyCorites (campaignId, 100, new Stripe("4242424242424242"), false ); // With canceling for new users
+					            newuser.buyCorites (campaignId, 100, new Swish("+46(050)1170001"), false ); // With canceling for new users
 
-					            user.buyCorites (campaignId, 50, new Stripe(), true );
-					            user.buyCorites (campaignId, 100, new Swish(), true );
+					            user.buyCorites (campaignId, 50, new Stripe("4242424242424242"), true );
+					            user.buyCorites (campaignId, 100, new Swish("+46(050)1170001"), true );
 					            
 					            user.checkEmailLink("a.inform-creator-about-accept", "page-explore-view explore-full>article");
 					            user.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
@@ -289,12 +289,12 @@ public class App {
 					            creator.fillReleaseInfo(campaignId);
 					            
 					            backer.login();
-					            backer.buyCorites (campaignId, 50, new Stripe(), true);
+					            backer.buyCorites (campaignId, 50, new Stripe("4242424242424242"), true);
 					            
 					            backerTwo.login();
-					            backerTwo.buyCorites (campaignId, 80, new Stripe(), true);
+					            backerTwo.buyCorites (campaignId, 80, new Stripe("4242424242424242"), true);
 					            
-					            creator.buyCorites (campaignId, 100, new Stripe(), true);
+					            creator.buyCorites (campaignId, 100, new Stripe("4242424242424242"), true);
 
 					            backer.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
 					            backerTwo.checkEmailLink( "a[data-e2e=informBackerAboutFunded]", "page-explore-list" );
@@ -421,8 +421,8 @@ public class App {
 								FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
 								flow.makeErrorScreenshot();
 							} catch (Exception e) {
-								flow.makeErrorScreenshot();
 								FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());
+								flow.makeErrorScreenshot();
 								e.printStackTrace();
 							} finally {
 					            INFO.writeln("Test of payment with incorrect card was finished");
@@ -454,7 +454,7 @@ public class App {
             root.teardown();
 */
 		} catch (TestFailedException e) {
-			FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flowBeforAfter.getFlowName() + "'. Current slide #" + flowBeforAfter.getCurrentSlideNumber());
+			FAILED.writeln("Some of the tests was failed. Flow name:'" + flowBeforAfter.getFlowName() + "'. Current slide #" + flowBeforAfter.getCurrentSlideNumber());
 			flowBeforAfter.makeErrorScreenshot();
 //            root.teardown();
             admin.teardown();

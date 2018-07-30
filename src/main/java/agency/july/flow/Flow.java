@@ -24,7 +24,7 @@ public class Flow implements IFlow {
 	private String pathToScreenshots;
 	private int currentSlideNumber = 0;
 	private int currentError = 0;
-	
+		
 	public Flow (String flowName) {
 		this.flowName = flowName;
 		this.pathToScreenshots = Accesses.getPathto().get("screenshots")/* + Configuration.getBrowser().toString() + "/"*/;

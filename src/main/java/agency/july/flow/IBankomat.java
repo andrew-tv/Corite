@@ -1,5 +1,5 @@
 package agency.july.flow;
 
 public interface IBankomat {
-	public void pay();
+	public void pay(Flow flow);
 }

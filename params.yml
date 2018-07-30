@@ -142,10 +142,10 @@ logger:
     failed: true
 
 runtests:
-#   - loginlogout
+   - loginlogout
 #   - registerwithemail
    - startcampaign
-#   - releaseinformation
+   - releaseinformation
    - releasecampaign
 #   - incorrectcard
 #   - payouts

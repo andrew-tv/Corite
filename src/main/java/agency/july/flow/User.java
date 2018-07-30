@@ -75,11 +75,11 @@ public class User /*extends Test*/ {
 
 	// Invest page
 	private Slider slider;
-	private Element anotherStripeCardBtn;
-	private Element newStripeCardBtn;
-	private Element anotherSwishCardBtn;
-	private Element newSwishCardBtn;
-	private TextInput swishPhoneNumber;
+//	private Element anotherStripeCardBtn;
+//	private Element newStripeCardBtn;
+//	private Element anotherSwishCardBtn;
+//	private Element newSwishCardBtn;
+//	private TextInput swishPhoneNumber;
 	
 	private Element thankyou;
 	private Element iframe;
@@ -149,11 +149,11 @@ public class User /*extends Test*/ {
 		buyCoritesBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("buyCoritesBtn")));
 		// Invest page
 		slider = new Slider(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("slider")));
-		anotherStripeCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherStripeCardBtn")));
-		newStripeCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newStripeCardBtn")));
-		anotherSwishCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherSwishCardBtn")));
-		newSwishCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newSwishCardBtn")));
-		swishPhoneNumber = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("swishPhoneNumber")));
+//		anotherStripeCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherStripeCardBtn")));
+//		newStripeCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newStripeCardBtn")));
+//		anotherSwishCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("anotherSwishCardBtn")));
+//		newSwishCardBtn = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("newSwishCardBtn")));
+//		swishPhoneNumber = new TextInput(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("swishPhoneNumber")));
 
 		iframe = new Element(this.flow, By.cssSelector ("ngx-stripe-card iframe"));
 		thankyou = new Element(this.flow, By.cssSelector(Configuration.getCsss().get("investpage").get("thankyou")));
@@ -376,12 +376,12 @@ public class User /*extends Test*/ {
 		
 		String cssS = Configuration.getCsss().get("explorepage").get("teaserCampaign").replace("{id}", campaignId);
 		Element campaign = new Element(this.flow, By.cssSelector (cssS));
-		
+DEBUG.writeln("cssS = " + cssS);	
 		exploreTab.click();
 		campaign.click();
 		
 		try {
-			WebDriverWait wait = new WebDriverWait(driver, 5);
+			WebDriverWait wait = new WebDriverWait(driver, 10);
 			wait.until(ExpectedConditions.presenceOfElementLocated( campaignViewPageBy ));
 			PASSED.writeln("Campaign view page was reached");
 		} catch (TimeoutException e) {
@@ -592,6 +592,8 @@ public class User /*extends Test*/ {
 			throw new TestFailedException();
 		}
 		
+		bankomat.pay(flow);
+/*		
 		String bankomatType = bankomat.getClass().getSimpleName();
 		
 		switch (bankomatType) {
@@ -651,7 +653,7 @@ public class User /*extends Test*/ {
 			throw new TestFailedException();			
 		}
 		
-		if ( accept ) {
+*/		if ( accept ) {
 			submitBtn.click(); // Get corites
 			
 			if ( thankyou.exists() ) {		
@@ -705,7 +707,7 @@ public class User /*extends Test*/ {
 			FAILED.writeln("Page with element 'page-explore-invest' was not reached");
 			throw new TestFailedException();
 		}
-
+/*
 		boolean userHaveCard = anotherStripeCardBtn.exists(); // User have creditcard	
 	
 		if ( userHaveCard ) 
@@ -752,7 +754,7 @@ public class User /*extends Test*/ {
 			FAILED.writeln("iframe for credit card information is not exist");			
 			flow.makeErrorScreenshot();
 		}
-		accentBtn.click(); // Cancel getting corites
+*/		accentBtn.click(); // Cancel getting corites
 		exploreTab.click(); // Navigate from invest page to unblock the order immediately
 	}
 	
