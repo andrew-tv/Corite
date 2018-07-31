@@ -22,6 +22,7 @@ csss:
        informBackerAboutFunded: "a[data-e2e=informBackerAboutFunded]"
     commonelements:
        matError: "mat-error"
+       errorMassage: "app-error-message"
        submitBtn: "form .mat-flat-button.mat-primary"
        accentBtn: "form .mat-flat-button.mat-accent"
     loginpage:
@@ -147,5 +148,5 @@ runtests:
    - startcampaign
    - releaseinformation
    - releasecampaign
-#   - incorrectcard
+   - incorrectcard
 #   - payouts

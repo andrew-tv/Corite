@@ -212,13 +212,16 @@ public class App {
 					            
 					            String campaignId = admin.getCampaignId(Configuration.getPatterns().get(2).split(" ")[1]);
 					            
-					            user.checkMyCampaignStatus(campaignId, CampaignStatus.ACTIVE);
+					            user.checkMyCampaignStatus(campaignId, CampaignStatus.DRAFT);
 					            
 					            admin.acceptCampaignByEmail("a.inform-campaign-to-moderate", Configuration.getPatterns().get(2));
 					            
 					            nonameUser.checkCampaignInList(campaignId);
 					            
+					            user.checkMyCampaignStatus(campaignId, CampaignStatus.ACTIVE);
+					            
 					            newuser.login();
+					            
 					            newuser.buyCorites (campaignId, 100, new Stripe("4242424242424242"), false ); // With canceling for new users
 					            newuser.buyCorites (campaignId, 100, new Swish("+46(050)1170001"), false ); // With canceling for new users
 
@@ -411,11 +414,12 @@ public class App {
 
 					            user.login();
 					            String campaignId = Configuration.getPatterns().get(3); // Predefined campaign
-					            user.checkIncorrectCard(campaignId, "4242424242424242"); // Проходит Ok
-					            user.checkIncorrectCard(campaignId, "4242424242424241"); // Не проходит Ok
-					            user.checkIncorrectCard(campaignId, "4000000000000119"); // Проходит, а не должно
-					            user.checkIncorrectCard(campaignId, "4000000000000069"); // Проходит, а не должно
-					            user.checkIncorrectCard(campaignId, "4000000000000127"); // Проходит, а не должно
+					            user.checkIncorrectCard(campaignId, 50, new Stripe("4242424242424242")); // Проходит Ok
+					            user.checkIncorrectCard(campaignId, 50, new Stripe("4242424242424241")); // Не проходит Ok
+					            user.checkIncorrectCard(campaignId, 50, new Stripe("4000000000000119")); // Проходит, а не должно
+					            user.checkIncorrectCard(campaignId, 50, new Stripe("4000000000000069")); // Проходит, а не должно
+					            user.checkIncorrectCard(campaignId, 50, new Stripe("4000000000000127")); // Проходит, а не должно
+//					            user.checkIncorrectCard(campaignId, 50, new Swish("+4605011180012")); // Не проходит Ok
 					            							            
 							} catch (TestFailedException e) {
 								FAILED.writeln("Test of payment with incorrect card was failed. Flow name:'" + flow.getFlowName() + "'. Current slide #" + flow.getCurrentSlideNumber());

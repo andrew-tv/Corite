@@ -561,7 +561,7 @@ DEBUG.writeln("cssS = " + cssS);
 	
 	public void buyCorites (String campaignId, int quantity, IBankomat bankomat, boolean accept) {
 				
-		ACTION.writeln("Buy corites. User: '" + this.getUserFullName() + "'");
+		ACTION.writeln("Buy corites by user: '" + this.getUserFullName() + "' with " + bankomat.getClass().getSimpleName());
 		flow.setDriver(driver);
 		WebDriverWait wait = new WebDriverWait(driver, 10);
 		
@@ -593,67 +593,8 @@ DEBUG.writeln("cssS = " + cssS);
 		}
 		
 		bankomat.pay(flow);
-/*		
-		String bankomatType = bankomat.getClass().getSimpleName();
 		
-		switch (bankomatType) {
-		
-		case "Stripe" :
-			boolean userHaveCard = anotherStripeCardBtn.exists(); // User have creditcard
-			if ( userHaveCard ) 
-				anotherStripeCardBtn.click();
-			else 
-				newStripeCardBtn.click();
-			if ( iframe.exists() ) {
-				
-				int i = 0;		
-				do {
-					driver.switchTo().defaultContent();
-					flow.sleep(100);
-					driver.switchTo().frame(driver.findElement(iframe.getBy()));
-				} while ( driver.findElements(By.cssSelector("div#root > form")).size() == 0 && i++ < 20 );
-				
-				try {
-					WebDriverWait waitIntoIframe = new WebDriverWait(driver, 5);
-					waitIntoIframe.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div#root > form")) );
-					PASSED.writeln("There is access to 'Stripe' iframe on the invest page");
-				} catch (TimeoutException e) {
-					FAILED.writeln("There isn't access to 'Stripe' iframe on the invest page");
-					flow.makeErrorScreenshot();
-					flow.makeErrorPageSource();
-					driver.switchTo().frame(0);
-					flow.sleep(1000);
-				}
-				
-				cardNumber.set("4242424242424242");
-				expDate.set("424");
-				cvc.set("242");
-				zip.set("42424");
-				
-				driver.switchTo().defaultContent();
-				
-			} else {
-				FAILED.writeln("iframe, for setting the credit card information, is not exist");			
-				flow.makeErrorScreenshot();
-			}
-		break;
-		
-		case "Swish" :
-			boolean userHavePhone = anotherSwishCardBtn.exists(); // User have creditcard
-			if ( userHavePhone ) 
-				anotherSwishCardBtn.click();
-			else
-				newSwishCardBtn.click();
-				
-			swishPhoneNumber.set("+46(050)1111111");
-			
-		break;
-		default :
-			FAILED.writeln("Unknown payment system: " + bankomatType);
-			throw new TestFailedException();			
-		}
-		
-*/		if ( accept ) {
+		if ( accept ) {
 			submitBtn.click(); // Get corites
 			
 			if ( thankyou.exists() ) {		
@@ -669,9 +610,9 @@ DEBUG.writeln("cssS = " + cssS);
 
 	}
 	
-	public void checkIncorrectCard(String campaignId, String card) {
+	public void checkIncorrectCard(String campaignId, int quantity, IBankomat bankomat) {
 		
-		ACTION.writeln("Buy corites with incorrect cards.");
+		ACTION.writeln("Buy corites with incorrect cards");
 		flow.setDriver(driver);
 		WebDriverWait wait = new WebDriverWait(driver, 5);
 		
@@ -695,7 +636,7 @@ DEBUG.writeln("cssS = " + cssS);
 		
 		buyCoritesBtn.click();
 
-		slider.set(50); // Buy a half of corites
+		slider.set(quantity); // Buy a half of corites
 		flow.waitForStableLocation(By.cssSelector("div.mat-slider-thumb"), 160);
 		
 		submitBtn.click();
@@ -707,54 +648,18 @@ DEBUG.writeln("cssS = " + cssS);
 			FAILED.writeln("Page with element 'page-explore-invest' was not reached");
 			throw new TestFailedException();
 		}
-/*
-		boolean userHaveCard = anotherStripeCardBtn.exists(); // User have creditcard	
-	
-		if ( userHaveCard ) 
-			anotherStripeCardBtn.click();
-		else
-			newStripeCardBtn.click();
+		flow.makeScreenshot("A");
+		bankomat.pay(flow);
+		flow.makeScreenshot("B");
 		
-		if ( iframe.exists() ) {
-			
-			int i = 0;		
-			do {
-				driver.switchTo().defaultContent();
-				flow.sleep(100);
-				driver.switchTo().frame(driver.findElement(iframe.getBy()));
-			} while ( driver.findElements(By.cssSelector("div#root > form")).size() == 0 && i++ < 20 );
-			
-			try {
-				wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector("div#root > form")) );
-				PASSED.writeln("There is access to 'Stripe' iframe on the invest page");
-			} catch (TimeoutException e) {
-				FAILED.writeln("There isn't access to 'Stripe' iframe on the invest page");
-				flow.makeErrorScreenshot();
-				flow.makeErrorPageSource();
-				driver.switchTo().frame(0);
-				flow.sleep(1000);
-			}
-			
-			cardNumber.set(card);
-			expDate.set("424");
-			cvc.set("242");
-			zip.set("42424");
-			
-			flow.sleep(100);
-			
-			driver.switchTo().defaultContent();
-			
-			try {
-				PASSED.writeln("Incorrect card '" + card + "' was declined with message: '" + matError.getText() + "'");
-			} catch (TimeoutException e) {
-				FAILED.writeln("Incorrect card '" + card + "' was not declined");
-				flow.makeErrorScreenshot();
-			}
-		} else {
-			FAILED.writeln("iframe for credit card information is not exist");			
+		try {
+			PASSED.writeln("Incorrect card '" + bankomat.getNumber() + "' was declined with message: '" + matError.getText() + "'");
+		} catch (TimeoutException e) {
+			WARNING.writeln("Incorrect card '" + bankomat.getNumber() + "' was not declined");
 			flow.makeErrorScreenshot();
 		}
-*/		accentBtn.click(); // Cancel getting corites
+		
+		accentBtn.click(); // Cancel getting corites
 		exploreTab.click(); // Navigate from invest page to unblock the order immediately
 	}
 	
@@ -939,6 +844,7 @@ DEBUG.writeln("cssS = " + cssS);
     		WebDriverWait wait = new WebDriverWait(driver, 10);
 			wait.until( ExpectedConditions.presenceOfElementLocated(By.cssSelector(cssS)) );
     		PASSED.writeln("There is campaign #" + campaignId + " on Explore list");
+        	flow.makeScreenshot("Explore");
 	    } catch (TimeoutException e) {
 			FAILED.writeln("There isn't campaign #" + campaignId + " on Explore list");
 			flow.makeErrorScreenshot();    	
@@ -984,6 +890,8 @@ DEBUG.writeln("cssS = " + cssS);
     	navigateToMyCampaignsList();
 		String cssS = Configuration.getCsss().get("mycampaignspage").get("campaignStatus").replace("{id}", campaignId);
 		String campaignStatus = new Element(this.flow, By.cssSelector (cssS)).getText();
+		
+		flow.makeScreenshot("Status");
 
 		INFO.writeln("Campaign status is '" + campaignStatus + "'"); 
 		switch ( campaignStatus ) {
@@ -999,6 +907,8 @@ DEBUG.writeln("cssS = " + cssS);
 	public void checkMyCampaignStatus(String campaignId, CampaignStatus status) {
 		ACTION.writeln("Check my campaign status. Campaign #" + campaignId);    	
     	flow.setDriver(driver);
+    	
+    	driver.navigate().refresh();
     	
     	CampaignStatus actualStatus = getMyCampaignStatus(campaignId);
 

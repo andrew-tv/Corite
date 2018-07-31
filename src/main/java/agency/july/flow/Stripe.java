@@ -15,10 +15,14 @@ import agency.july.webelements.TextInput;
 
 public class Stripe implements IBankomat {
 	
-	private String card;
+	private String number;
 	
-	public Stripe(String card) {
-		this.card = card;
+	public Stripe(String number) {
+		this.number = number;
+	}
+
+	public String getNumber() {
+		return number;
 	}
 
 	@Override
@@ -60,7 +64,7 @@ public class Stripe implements IBankomat {
 				flow.sleep(1000);
 			}
 			
-			cardNumber.set(card);
+			cardNumber.set(number);
 			expDate.set("424");
 			cvc.set("242");
 			zip.set("42424");
